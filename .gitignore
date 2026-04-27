@@ -26,3 +26,6 @@ secrets.json
 .vscode/
 .idea/
 *.swp
+
+# Migrations
+*/migrations/
