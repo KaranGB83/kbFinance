@@ -1,0 +1,15 @@
+{% extends 'stocks/layout.html' %}
+{% block title %}BUY Stocks{% endblock %}
+{% block body %}
+    <h2>SELL</h2>
+    {% if message %}
+        <div>{{message}}</div>
+    {% endif %}
+    <form action="{% url 'sell' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="symbol" placeholder="SYMBOL">
+        </div>
+        <input class="btn btn-primary" type="submit" value="BUY">
+    </form>
+{% endblock %}

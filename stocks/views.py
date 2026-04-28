@@ -111,7 +111,7 @@ def portfolio_view(request):
             "current_price":current_price,
             "total_value": current_price * p.quantity if current_price else 0
         })
-    return render(request, "portfolio.html", {"data": data})
+    return render(request, "index.html", {"data": data})
 
 @login_required
 def transaction_view(request):
