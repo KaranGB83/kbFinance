@@ -1,44 +1,130 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>{% block title %}KB Finance{% endblock %}</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-        <script src="{% static 'stocks/scripts.js' %}"></script>
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KB Finance{% endblock %}</title>
 
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="{% url 'index' %}">KB Finance</a>
-          
-            <div>
-              <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href=""><strong></strong></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="">Log Out</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="">Log In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="">Register</a>
-                    </li>
-              </ul>
-            </div>
-          </nav>
-        
-        <div class="body">
-            {% block body %}
-            {% endblock %}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand font-weight-bold" href="{% url 'index' %}">
+            <i class="bi bi-graph-up-arrow"></i> KB Finance
+        </a>
+
+        <!-- Mobile toggle -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+
+            <!-- Left links -->
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">
+                        <i class="bi bi-house"></i> Home
+                    </a>
+                </li>
+                {% if request.user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'portfolio' %}">
+                        <i class="bi bi-briefcase"></i> Portfolio
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'transaction' %}">
+                        <i class="bi bi-clock-history"></i> Transactions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'buy' %}">
+                        <i class="bi bi-cart-plus"></i> Buy
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'sell' %}">
+                        <i class="bi bi-cart-dash"></i> Sell
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <!-- Right links -->
+            <ul class="navbar-nav ml-auto">
+                {% if request.user.is_authenticated %}
+                <li class="nav-item">
+                    <span class="nav-link text-light">
+                        <i class="bi bi-person-circle"></i> {{ request.user.username }}
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">
+                        <i class="bi bi-box-arrow-right"></i> Log Out
+                    </a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">
+                        <i class="bi bi-box-arrow-in-right"></i> Log In
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">
+                        <i class="bi bi-person-plus"></i> Register
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
         </div>
-        <script src="{% static 'stocks/scripts.js' %}"></script>
+    </nav>
 
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Page Content -->
+    <div class="container mt-4">
+        {% block body %}
+        {% endblock %}
+    </div>
+
+    <!-- React mount point (use in child templates if needed) -->
+    <div id="react-root"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+    <!-- React -->
     <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <!-- Your scripts -->
+    <script src="{% static 'stocks/scripts.js' %}"></script>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>
