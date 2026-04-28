@@ -12,6 +12,8 @@ import yfinance as yf
 
 
 def index(request):
+    if not request.user.is_authenticated:
+        return render(request, "accounts/login.html")
     return render(request, "stocks/index.html")
 
 # ==============================================================================
