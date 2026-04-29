@@ -4,4 +4,72 @@
 
 {% block body %}
 <h2>Portfolio</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-secondary">
+            <div class="card-body">
+                <h6 class="card-title">Wallet Balance</h6>
+                <h4>₹{{ wallet_balance|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h6 class="card-title">Portfolio Value</h6>
+                <h4>₹{{ total_portfolio_value|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-dark">
+            <div class="card-body">
+                <h6 class="card-title">Total Net Worth</h6>
+                <h4>₹{{ wallet_balance|add:total_portfolio_value|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if data %}
+<div class="table-responsive">
+    <table class="table table-hover table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Symbol</th>
+                <th>Qty</th>
+                <th>Avg Buy Price</th>
+                <th>Current Price</th>
+                <th>Total Value</th>
+                <th>Gain / Loss</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td><strong>{{ item.symbol }}</strong></td>
+                <td>{{ item.quantity }}</td>
+                <td>₹{{ item.avg_price|floatformat:2 }}</td>
+                <td>
+                    {% if item.current_price %}
+                        ₹{{ item.current_price|floatformat:2 }}
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                </td>
+                <td>₹{{ item.total_value|floatformat:2 }}</td>
+                <td class="{% if item.gain_loss >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {% if item.gain_loss >= 0 %}+{% endif %}₹{{ item.gain_loss|floatformat:2 }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    You don't own any stocks yet. <a href="{% url 'stocks:buy' %}">Buy some!</a>
+</div>
+{% endif %}
 {% endblock %}

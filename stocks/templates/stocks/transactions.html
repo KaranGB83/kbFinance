@@ -1,9 +1,42 @@
 {% extends 'stocks/layout.html' %}
 {% block title %}Transactions{% endblock %}
 {% block body %}
-    <h2>Transactions</h2>
-    {% if message %}
-        <div>{{message}}</div>
+    <h2>Transaction History</h2>
+
+    {% if transactions %}
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Symbol</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td>{{ t.created_at|date:"d M Y, H:i" }}</td>
+                    <td>
+                        <span class="badge {% if t.transaction_type == 'BUY' %}badge-success{% else %}badge-danger{% endif %}">
+                            {{ t.transaction_type }}
+                        </span>
+                    </td>
+                    <td><strong>{{ t.stock.symbol }}</strong></td>
+                    <td>{{ t.quantity }}</td>
+                    <td>₹{{ t.price|floatformat:2 }}</td>
+                    <td>₹{{ t.quantity|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No transactions yet. <a href="{% url 'stocks:buy' %}">Make your first trade!</a>
+    </div>
     {% endif %}
-    
 {% endblock %}
