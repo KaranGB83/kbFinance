@@ -5,10 +5,13 @@
     {% if message %}
         <div>{{message}}</div>
     {% endif %}
-    <form action="{% url 'buy' %}" method="post">
+    <form action="{% url 'stocks:buy' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
             <input autofocus class="form-control" type="text" name="symbol" placeholder="SYMBOL">
+        </div>
+        <div class="form-group">
+            <input class="form-control" type="number" name="quantity" placeholder="Quantity" min="1" required>
         </div>
         <input class="btn btn-primary" type="submit" value="BUY">
     </form>

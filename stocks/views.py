@@ -13,7 +13,7 @@ import yfinance as yf
 
 def index(request):
     if not request.user.is_authenticated:
-        return render(request, "accounts/login.html")
+        return redirect("accounts:login")
     return render(request, "stocks/index.html")
 
 # ==============================================================================
@@ -28,7 +28,7 @@ def buy_stock(request):
         price = get_stock_price(symbol)
 
         if not price:
-            return render(request, "error.html", {"message": "Invalid Stock"})
+            return render(request, "stocks/buy.html", {"message": "Invalid Stock"})
         
         stock, _ = Stock.objects.get_or_create(symbol=symbol) 
         portfolio, created = Portfolio.objects.get_or_create(user=request.user, stock=stock)
@@ -37,7 +37,7 @@ def buy_stock(request):
         total_cost = price * quantity
 
         if wallet.amount < total_cost:
-            return render(request, "error.html", {"message": "Insufficient Funds"})
+            return render(request, "stocks/buy.html", {"message": "Insufficient Funds"})
 
         wallet.amount -= total_cost
         wallet.save()
@@ -57,25 +57,26 @@ def buy_stock(request):
             price = price
         )
 
-        return redirect("portfolio")
+        return redirect("stocks:portfolio")
     
-    return render(request, "buy.html")
+    return render(request, "stocks/buy.html")
 
 @login_required
 def sell_stock(request):
     if request.method == "POST":
-        symbol = request.POST.get("symbol")
+        symbol = request.POST.get("symbol").upper().strip()
         quantity = int(request.POST.get("quantity"))
-
+ 
         stock = get_object_or_404(Stock, symbol=symbol)
         portfolio = get_object_or_404(Portfolio, user=request.user, stock=stock)
-
+ 
         if quantity > portfolio.quantity:
-            return render(request, "error.html", {"message": "Not enough shares"})
+            return render(request, "stocks/sell.html", {"message": f"You only own {portfolio.quantity} share(s) of {symbol}."})
         
         price = get_stock_price(symbol)
         if not price:
-            return render(request, "error.html", {"message": "Could not fetch stock price"})
+            return render(request, "stocks/sell.html", {"message": "Could not fetch stock price. Please try again."})
+        
         portfolio.quantity -= quantity
 
         wallet = get_object_or_404(Wallet, user=request.user)
@@ -94,26 +95,39 @@ def sell_stock(request):
             quantity= quantity,
             price = price
         )
-        return redirect("portfolio")
-    return render(request, "sell.html")
+        return redirect("stocks:portfolio")
+    
+    return render(request, "stocks/sell.html")
 
 @login_required
 def portfolio_view(request):
-    portfolios = Portfolio.objects.filter(user=request.user)
-
+    portfolios = Portfolio.objects.filter(user=request.user).select_related("stock")
+ 
+    wallet = get_object_or_404(Wallet, user=request.user)
+ 
     data = []
+    total_portfolio_value = 0
     for p in portfolios:
         current_price = get_stock_price(p.stock.symbol)
+        total_value = current_price * p.quantity if current_price else 0
+        gain_loss = (current_price - p.avg_price) * p.quantity if current_price else 0
+        total_portfolio_value += total_value
         data.append({
-            "symbol":p.stock.symbol,
-            "quantity":p.quantity,
+            "symbol": p.stock.symbol,
+            "quantity": p.quantity,
             "avg_price": p.avg_price,
-            "current_price":current_price,
-            "total_value": current_price * p.quantity if current_price else 0
+            "current_price": current_price,
+            "total_value": total_value,
+            "gain_loss": gain_loss,
         })
-    return render(request, "index.html", {"data": data})
-
+ 
+    return render(request, "stocks/portfolio.html", {
+        "data": data,
+        "wallet_balance": wallet.amount,
+        "total_portfolio_value": total_portfolio_value,
+    })
+ 
 @login_required
 def transaction_view(request):
-    transactions = Transaction.objects.filter(user=request.user).order_by("-created_at")
-    return render(request, "transactions.html", {"transactions": transactions})
+    transactions = Transaction.objects.filter(user=request.user).select_related("stock").order_by("-created_at")
+    return render(request, "stocks/transactions.html", {"transactions": transactions})

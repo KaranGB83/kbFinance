@@ -1,0 +1,9 @@
+{% extends 'stocks/layout.html' %}
+{% block title %}Transactions{% endblock %}
+{% block body %}
+    <h2>Transactions</h2>
+    {% if message %}
+        <div>{{message}}</div>
+    {% endif %}
+    
+{% endblock %}

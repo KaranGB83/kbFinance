@@ -17,7 +17,7 @@
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand font-weight-bold" href="{% url 'index' %}">
+        <a class="navbar-brand font-weight-bold" href="{% url 'stocks:index' %}">
             <i class="bi bi-graph-up-arrow"></i> KB Finance
         </a>
 
@@ -31,28 +31,28 @@
             <!-- Left links -->
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'index' %}">
+                    <a class="nav-link" href="{% url 'stocks:index' %}">
                         <i class="bi bi-house"></i> Home
                     </a>
                 </li>
                 {% if request.user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'portfolio' %}">
+                    <a class="nav-link" href="{% url 'stocks:portfolio' %}">
                         <i class="bi bi-briefcase"></i> Portfolio
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'transactions' %}">
+                    <a class="nav-link" href="{% url 'stocks:transactions' %}">
                         <i class="bi bi-clock-history"></i> Transactions
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'buy' %}">
+                    <a class="nav-link" href="{% url 'stocks:buy' %}">
                         <i class="bi bi-cart-plus"></i> Buy
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'sell' %}">
+                    <a class="nav-link" href="{% url 'stocks:sell' %}">
                         <i class="bi bi-cart-dash"></i> Sell
                     </a>
                 </li>
@@ -63,23 +63,25 @@
             <ul class="navbar-nav ml-auto">
                 {% if request.user.is_authenticated %}
                 <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:profile' %}">
                     <span class="nav-link text-light">
                         <i class="bi bi-person-circle"></i> {{ request.user.username }}
                     </span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">
+                    <a class="nav-link" href="{% url 'accounts:logout' %}">
                         <i class="bi bi-box-arrow-right"></i> Log Out
                     </a>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">
+                    <a class="nav-link" href="{% url 'accounts:login' %}">
                         <i class="bi bi-box-arrow-in-right"></i> Log In
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">
+                    <a class="nav-link" href="{% url 'accounts:register' %}">
                         <i class="bi bi-person-plus"></i> Register
                     </a>
                 </li>
