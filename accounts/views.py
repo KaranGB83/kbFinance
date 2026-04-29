@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from stocks.models import Wallet
 from .models import User
 
 # Create your views here.
@@ -19,7 +20,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(reverse("stocks:index"))
         else:
             return render(request, "accounts/login.html", {
                 "message": "Invalid username and/or password."
@@ -30,7 +31,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("stocks:index"))
 
 
 def register(request):
@@ -55,6 +56,22 @@ def register(request):
                 "message": "Username already taken."
             })
         login(request, user)
-        return HttpResponseRedirect(reverse("index"))
+
+        try:
+            Wallet.objects.create(user=user, amount=1000)
+        except IntegrityError:
+            return render(request, "accounts/register.html", {
+                "message": "Error creating wallet for user."
+            })
+        return HttpResponseRedirect(reverse("stocks:index"))
     else:
         return render(request, "accounts/register.html")
+
+@login_required
+def profile(request):
+    wallet, created = Wallet.objects.get_or_create(user=request.user)
+    wallet_balance = wallet.amount
+    return render(request, "accounts/profile.html", {
+        "user": request.user,
+        "wallet_balance": wallet_balance,
+    })
