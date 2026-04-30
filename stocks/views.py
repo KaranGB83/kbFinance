@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from accounts.models import User
 
 from .models import Stock, Portfolio, Transaction, Wallet
-from .util import get_stock_price
+from .util import get_stock_price, get_stock_info
 
 import yfinance as yf
 
@@ -99,6 +99,9 @@ def sell_stock(request):
     
     return render(request, "stocks/sell.html")
 
+# ==============================================================================
+# View Functions on stocks stocks.
+# ==============================================================================
 @login_required
 def portfolio_view(request):
     portfolios = Portfolio.objects.filter(user=request.user).select_related("stock")
@@ -131,3 +134,16 @@ def portfolio_view(request):
 def transaction_view(request):
     transactions = Transaction.objects.filter(user=request.user).select_related("stock").order_by("-created_at")
     return render(request, "stocks/transactions.html", {"transactions": transactions})
+
+@login_required
+def quote(request):
+    symbol = request.GET.get("symbol", "").upper().strip()
+    if not symbol:
+        return JsonResponse({"message": "No symbol Provided"}, status=400)
+    
+    info = get_stock_info(symbol)
+    if not info["price"]:
+        return JsonResponse({"error": f"Could not find a price for '{symbol}'. Check the symbol and try again."}, status=404)
+ 
+    return JsonResponse(info)
+

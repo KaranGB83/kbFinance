@@ -3,16 +3,17 @@
 {% block body %}
     <h2>BUY</h2>
     {% if message %}
-        <div>{{message}}</div>
+        <div class="alert alert-danger">{{ message }}</div>
     {% endif %}
     <form action="{% url 'stocks:buy' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
-            <input autofocus class="form-control" type="text" name="symbol" placeholder="SYMBOL">
+            <input autofocus class="form-control text-uppercase" type="text" name="symbol" placeholder="Symbol" value="{{ prefill_symbol }}">
         </div>
         <div class="form-group">
             <input class="form-control" type="number" name="quantity" placeholder="Quantity" min="1" required>
         </div>
-        <input class="btn btn-primary" type="submit" value="BUY">
+        <input class="btn btn-success" type="submit" value="BUY">
+        <a href="{% url 'stocks:index' %}" class="btn btn-secondary ml-2">Cancel</a>
     </form>
 {% endblock %}
