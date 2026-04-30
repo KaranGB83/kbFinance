@@ -77,8 +77,8 @@ def buy_stock(request):
         )
 
         return redirect("stocks:portfolio")
-    
-    return render(request, "stocks/buy.html")
+    symbol = request.GET.get("symbol", "").upper().strip()
+    return render(request, "stocks/buy.html", {"prefill_symbol":symbol})
 
 @login_required
 def sell_stock(request):
@@ -116,7 +116,8 @@ def sell_stock(request):
         )
         return redirect("stocks:portfolio")
     
-    return render(request, "stocks/sell.html")
+    symbol = request.GET.get("symbol", "").upper().strip()
+    return render(request, "stocks/sell.html", {"prefill_symbol":symbol})
 
 # ==============================================================================
 # View Functions on stocks stocks.
