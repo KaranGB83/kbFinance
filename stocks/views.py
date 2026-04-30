@@ -1,20 +1,39 @@
 from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, JsonResponse
-
-from accounts.models import User
-
+from django.http import JsonResponse
+ 
 from .models import Stock, Portfolio, Transaction, Wallet
 from .util import get_stock_price, get_stock_info
-
-import yfinance as yf
-
-
+ 
+ 
 def index(request):
     if not request.user.is_authenticated:
         return redirect("accounts:login")
-    return render(request, "stocks/index.html")
+ 
+    wallet = get_object_or_404(Wallet, user=request.user)
+    portfolios = Portfolio.objects.filter(user=request.user).select_related("stock")
+ 
+    total_portfolio_value = 0
+    for p in portfolios:
+        price = get_stock_price(p.stock.symbol)
+        if price:
+            total_portfolio_value += price * p.quantity
+ 
+    recent_transactions = (
+        Transaction.objects
+        .filter(user=request.user)
+        .select_related("stock")
+        .order_by("-created_at")[:5]
+    )
+ 
+    return render(request, "stocks/index.html", {
+        "wallet_balance": wallet.amount,
+        "total_portfolio_value": total_portfolio_value,
+        "net_worth": wallet.amount + total_portfolio_value,
+        "recent_transactions": recent_transactions,
+        "holdings_count": portfolios.count(),
+    })
 
 # ==============================================================================
 # CRUD Operations on stocks.
