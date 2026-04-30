@@ -41,7 +41,7 @@ def index(request):
 @login_required
 def buy_stock(request):
     if request.method == "POST":
-        symbol = request.POST.get("symbol")
+        symbol = request.POST.get("symbol", "").upper().strip()
         quantity = int(request.POST.get("quantity"))
 
         price = get_stock_price(symbol)
@@ -158,7 +158,7 @@ def transaction_view(request):
 def quote(request):
     symbol = request.GET.get("symbol", "").upper().strip()
     if not symbol:
-        return JsonResponse({"message": "No symbol Provided"}, status=400)
+        return JsonResponse({"error": "No symbol provided."}, status=400)
     
     info = get_stock_info(symbol)
     if not info["price"]:
