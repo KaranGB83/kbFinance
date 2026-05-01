@@ -1,3 +1,6 @@
+/* ============================================================================== */
+/* Message Animation
+/* ============================================================================== */
 .msg {
   position: relative;
   overflow: hidden;
@@ -19,4 +22,77 @@
   5%  { left: 0; }  
   90%  { left: 0; }      
   100% { left: -110%; }  
+}
+
+/* ============================================================================== */
+/* Dark Mode
+/* ============================================================================== */
+[data-theme="dark"] {
+    --bg:        #121212;
+    --surface:   #1e1e1e;
+    --surface2:  #2a2a2a;
+    --border:    #333;
+    --text:      #e0e0e0;
+    --muted:     #888;
+}
+
+[data-theme="dark"] body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Cards */
+[data-theme="dark"] .card {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+}
+[data-theme="dark"] .card-header {
+    border-color: var(--border) !important;
+}
+
+/* Tables */
+[data-theme="dark"] .table {
+    color: var(--text);
+}
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th {
+    border-color: var(--border) !important;
+}
+[data-theme="dark"] .thead-dark th {
+    background: #0a0a0a !important;
+    border-color: #000 !important;
+}
+[data-theme="dark"] .table-hover tbody tr:hover {
+    background: var(--surface2);
+    color: var(--text);
+}
+
+/* Inputs & form controls */
+[data-theme="dark"] .form-control {
+    background: var(--surface2);
+    border-color: var(--border);
+    color: var(--text);
+}
+[data-theme="dark"] .form-control:focus {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: #555;
+    box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.1);
+}
+
+/* Alerts */
+[data-theme="dark"] .alert-info {
+    background: #0d3349;
+    border-color: #1a5276;
+    color: #aed6f1;
+}
+
+/* Text helpers */
+[data-theme="dark"] .text-muted { color: var(--muted) !important; }
+[data-theme="dark"] .text-dark  { color: var(--text)  !important; }
+
+/* Dropdown menus (navbar mobile) */
+[data-theme="dark"] .navbar-collapse {
+    background: #1a1a1a;
 }
