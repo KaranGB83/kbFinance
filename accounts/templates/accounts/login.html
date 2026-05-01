@@ -3,7 +3,10 @@
 {% block body %}
     <h2>Log IN</h2>
     {% if message %}
-        <div>{{message}}</div>
+        <div class="msg">
+            <div class="alert alert-danger">{{ message }}</div>
+        </div>
+        <br>
     {% endif %}
     <form action="{% url 'accounts:login' %}" method="post">
         {% csrf_token %}

@@ -6,6 +6,7 @@
         <div class="msg">
             <div class="alert alert-danger">{{ message }}</div>
         </div>
+        <br>
     {% endif %}
     <form action="{% url 'stocks:sell' %}" method="post">
         {% csrf_token %}
