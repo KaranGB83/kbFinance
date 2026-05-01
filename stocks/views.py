@@ -1,8 +1,10 @@
 from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
- 
+from django.urls import reverse
+
 from .models import Stock, Portfolio, Transaction, Wallet
 from .util import get_stock_price, get_stock_info
  
@@ -45,40 +47,39 @@ def buy_stock(request):
         quantity = int(request.POST.get("quantity"))
 
         price = get_stock_price(symbol)
-
         if not price:
-            return render(request, "stocks/buy.html", {"message": "Invalid Stock"})
-        
-        stock, _ = Stock.objects.get_or_create(symbol=symbol) 
-        portfolio, created = Portfolio.objects.get_or_create(user=request.user, stock=stock)
+            messages.error(request, f"Invalid stock symbol: {symbol}")
+            return redirect(f"{reverse('stocks:buysell')}?symbol={symbol}")
+
+        stock, _ = Stock.objects.get_or_create(symbol=symbol)
+        portfolio, _ = Portfolio.objects.get_or_create(user=request.user, stock=stock)
 
         wallet = get_object_or_404(Wallet, user=request.user)
         total_cost = price * quantity
 
         if wallet.amount < total_cost:
-            return render(request, "stocks/buy.html", {"message": "Insufficient Funds"})
+            messages.error(request, f"Insufficient funds. Need ₹{total_cost:,.2f}, have ₹{wallet.amount:,.2f}.")
+            return redirect(f"{reverse('stocks:buysell')}?symbol={symbol}")
 
         wallet.amount -= total_cost
         wallet.save()
 
         current_total_cost = portfolio.quantity * portfolio.avg_price
-        new_cost = current_total_cost + total_cost
-
         portfolio.quantity += quantity
-        portfolio.avg_price = new_cost / portfolio.quantity
+        portfolio.avg_price = (current_total_cost + total_cost) / portfolio.quantity
         portfolio.save()
 
         Transaction.objects.create(
-            user = request.user,
-            stock = stock,
-            transaction_type = 'BUY',
-            quantity= quantity,
-            price = price
+            user=request.user,
+            stock=stock,
+            transaction_type='BUY',
+            quantity=quantity,
+            price=price,
         )
-
         return redirect("stocks:portfolio")
-    symbol = request.GET.get("symbol", "").upper().strip()
-    return render(request, "stocks/buy.html", {"prefill_symbol":symbol})
+    symbol = request.GET.get("symbol", "")
+    return redirect(f"{reverse('stocks:buysell')}?symbol={symbol}")
+
 
 @login_required
 def sell_stock(request):
@@ -90,14 +91,14 @@ def sell_stock(request):
         portfolio = get_object_or_404(Portfolio, user=request.user, stock=stock)
  
         if quantity > portfolio.quantity:
-            return render(request, "stocks/sell.html", {"message": f"You only own {portfolio.quantity} share(s) of {symbol}."})
-        
+            messages.error(request, f"You only own {portfolio.quantity} share(s) of {symbol}.")
+            return redirect(f"{reverse('stocks:buysell')}?symbol={symbol}")
+
         price = get_stock_price(symbol)
         if not price:
-            return render(request, "stocks/sell.html", {"message": "Could not fetch stock price. Please try again."})
-        
+            messages.error(request, "Could not fetch stock price. Please try again.")
+            return redirect(f"{reverse('stocks:buysell')}?symbol={symbol}")
         portfolio.quantity -= quantity
-
         wallet = get_object_or_404(Wallet, user=request.user)
         wallet.amount += price * quantity
         wallet.save()
@@ -115,9 +116,16 @@ def sell_stock(request):
             price = price
         )
         return redirect("stocks:portfolio")
-    
-    symbol = request.GET.get("symbol", "").upper().strip()
-    return render(request, "stocks/sell.html", {"prefill_symbol":symbol})
+    symbol = request.GET.get("symbol", "")
+    return redirect(f"{reverse('stocks:buysell')}?symbol={symbol}")
+
+
+@login_required
+def buysell(request):
+    symbol = request.GET.get("symbol", "")
+    print("prefill_symbol:", symbol)
+    return render(request, "stocks/buysell.html", {"prefill_symbol": symbol})
+
 
 # ==============================================================================
 # View Functions on stocks stocks.
@@ -159,11 +167,10 @@ def transaction_view(request):
 def quote(request):
     symbol = request.GET.get("symbol", "").upper().strip()
     if not symbol:
-        return JsonResponse({"error": "No symbol provided."}, status=400)
+        return JsonResponse({"message": "No symbol Provided"}, status=400)
     
     info = get_stock_info(symbol)
     if not info["price"]:
         return JsonResponse({"error": f"Could not find a price for '{symbol}'. Check the symbol and try again."}, status=404)
  
     return JsonResponse(info)
-

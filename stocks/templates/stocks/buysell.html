@@ -1,0 +1,19 @@
+{% extends 'stocks/layout.html' %}
+{% load static %}
+{% block title %}Trade — KB Finance{% endblock %}
+
+{% block body %}
+<div id="trade-root"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.TRADE = {
+        csrf:    "{{ csrf_token }}",
+        buyUrl:  "{% url 'stocks:buy' %}",
+        sellUrl: "{% url 'stocks:sell' %}",
+        prefill: "{{ prefill_symbol|escapejs }}",
+    };
+</script>
+<script type="text/babel" src="{% static 'stocks/buysell.js' %}"></script>
+{% endblock %}

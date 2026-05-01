@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- My customyzed Stylesheet -->
     <link rel="stylesheet" href="{% static 'stocks/styles.css' %}">
 
     {% block head %}{% endblock %}
@@ -49,12 +48,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'stocks:buy' %}">
+                    <a class="nav-link" href="{% url 'stocks:buysell' %}">
                         <i class="bi bi-cart-plus"></i> Buy
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'stocks:sell' %}">
+                    <a class="nav-link" href="{% url 'stocks:buysell' %}">
                         <i class="bi bi-cart-dash"></i> Sell
                     </a>
                 </li>
@@ -126,7 +125,7 @@
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
-    <!-- Inject Django URLs for use in scripts.js -->
+    <!-- Django URLs for use in scripts.js -->
     <script>
         window.KB_URLS = {
             quote: "{% url 'stocks:quote' %}",
@@ -135,7 +134,16 @@
         };
     </script>
 
-    <!-- Your scripts -->
+    <!-- Django URLs for use in scripts.js -->
+    <script>
+        window.KB_URLS = {
+            quote: "{% url 'stocks:quote' %}",
+            buy:   "{% url 'stocks:buy' %}",
+            sell:  "{% url 'stocks:sell' %}",
+        };
+    </script>
+
+    <!-- custom scripts -->
     <script src="{% static 'stocks/scripts.js' %}"></script>
 
     {% block scripts %}{% endblock %}
