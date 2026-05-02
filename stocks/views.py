@@ -8,6 +8,9 @@ from django.urls import reverse
 from .models import Stock, Portfolio, Transaction, Wallet
 from .util import get_stock_price, get_stock_info
  
+# ==============================================================================
+# HomePage
+# ==============================================================================
  
 def index(request):
     if not request.user.is_authenticated:
