@@ -9,10 +9,11 @@
 {% block scripts %}
 <script>
     window.TRADE = {
-        csrf:    "{{ csrf_token }}",
-        buyUrl:  "{% url 'stocks:buy' %}",
-        sellUrl: "{% url 'stocks:sell' %}",
-        prefill: "{{ prefill_symbol|escapejs }}",
+        csrf:            "{{ csrf_token }}",
+        buyUrl:          "{% url 'stocks:buy' %}",
+        sellUrl:         "{% url 'stocks:sell' %}",
+        prefill:         "{{ prefill_symbol|escapejs }}",
+        prefillExchange: "{{ prefill_exchange|escapejs }}",
     };
 </script>
 <script type="text/babel" src="{% static 'stocks/buysell.js' %}"></script>
