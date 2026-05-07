@@ -18,9 +18,9 @@ function parsePrefill(raw, exchangeHint) {
 const { sym: initSymbol, exchange:initExchange } = parsePrefill(prefill, prefillExchange)
 
 const EXCHANGES = [
-    { value:"BSE", label:"BSE"},
-    { value:"NSE", label:"NSE"},
-    { value:"OTHER", label:"Other"},
+    { value: "NSE", label: "NSE" },
+    { value: "BSE", label: "BSE" },
+    { value: "OTHER", label: "Other" },
 ];
 
 // ---------------------------------------------------------------------------
