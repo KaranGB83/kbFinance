@@ -59,7 +59,7 @@ def get_stock_info(name: str, exchange: str = None):
         exch_name = info.get("exchange", "")
 
     if price is None:
-        price = get_stock_price(name)
+        price = get_stock_price(resolved)
     
     stock_name = info.get("longName") or info.get("shortName") or name
 
