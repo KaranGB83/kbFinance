@@ -2,14 +2,36 @@
 // Django values are injected via window.TRADE in buysell.html
 
 const { useState } = React;
+ 
+const { csrf, buyUrl, sellUrl, prefill, prefillExchange } = window.TRADE;
 
-const { csrf, buyUrl, sellUrl, prefill } = window.TRADE;
+// ---------------------------------------------------------------------------
+// Parse a prefilled symbol: strip .NS / .BO suffix and infer exchange
+// ---------------------------------------------------------------------------
 
+function parsePrefill(raw, exchangeHint) {
+    if (raw.endsWith(".NS")) return { sym: raw.slice(0, -3), exchange: "NSE" };
+    if (raw.endsWith(".BO")) return { sym: raw.slice(0, -3), exchange: "BSE" };
+    return { sym: raw, exchange: exchangeHint || "NSE" };
+}
+
+const { sym: initSymbol, exchange:initExchange } = parsePrefill(prefill, prefillExchange)
+
+const EXCHANGES = [
+    { value:"BSE", label:"BSE"},
+    { value:"NSE", label:"NSE"},
+    { value:"OTHER", label:"Other"},
+];
+
+// ---------------------------------------------------------------------------
+// Trade Fuvtion of SPA
+// ---------------------------------------------------------------------------
 function TradeApp() {
     const [mode, setMode]           = useState("BUY");
-    const [symbol, setSymbol]       = useState(prefill);
+    const [symbol, setSymbol]       = useState(initSymbol);
     const [quantity, setQuantity]   = useState("");
-
+    const [exchange, setExchange] = useState(initExchange);
+ 
     const isBuy         = mode === "BUY";
     const actionUrl     = isBuy ? buyUrl : sellUrl;
     const accent        = isBuy ? "#2dff1a" : "#ff442f";
@@ -19,7 +41,7 @@ function TradeApp() {
     return (
         <div style={styles.page}>
             <div style={styles.card}>
-
+ 
                 {/* Header */}
                 <div style={styles.header}>
                     <span style={{fontSize:"22px", color:"#444"}}>
@@ -31,7 +53,7 @@ function TradeApp() {
                 </div>
 
                 {/* Sliding Toggle */}
-                <div style={{marginBottom:"28px"}}>
+                <div style={{ marginBottom: "20px" }}>
                     <div style={styles.toggleTrack}>
                         <div style={{
                             ...styles.togglePill,
@@ -48,36 +70,68 @@ function TradeApp() {
                         </button>
                         <button type="button" onClick={() => setMode("SELL")} style={{
                             ...styles.toggleBtn,
-                            color: isBuy ? "#fff" : "#888",
+                            color: !isBuy ? "#fff" : "#888",
                             fontWeight: !isBuy ? 700 : 500,
                         }}>
                             <i className="bi bi-arrow-down-circle"></i> SELL
                         </button>
                     </div>
                 </div>
-
+ 
+                {/* Exchange selector */}
+                <div style={{ marginBottom: "24px" }}>
+                    <label style={styles.label}>Exchange</label>
+                    <div style={styles.exchangeTag}>
+                        {EXCHANGES.map(({ value, label}) => {
+                            const active = exchange === value;
+                            return (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() => setExchange(value)}
+                                    style={{
+                                        ...styles.exchangeBtn,
+                                        background: active ? "#1a1a1a" : "transparent",
+                                        color:      active ? "#fff" : "#666",
+                                        fontWeight: active ? 700 : 400,
+                                        boxShadow:  active ? "0 1px 6px rgba(0,0,0,0.18)" : "none",
+                                    }}>
+                                    {label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    {exchange === "OTHER" && (
+                        <p style={{ fontSize: "12px", color: "#999", marginTop: "6px", marginBottom0 }}>
+                            Enter the full yfinance symbol (e.g. <code>GOLD.NS</code>, <code>NIFTY50.NS</code>)
+                        </p>
+                    )}
+                </div>
+ 
                 {/* Form */}
                 <form action={actionUrl} method="post">
                     <input type="hidden" name="csrfmiddlewaretoken" value={csrf} />
-
+                    <input type="hidden" name="exchange" value={exchange} />
+ 
                     <div style={styles.fieldWrap}>
-                        <label style={styles.label}> STOCK SYMBOL</label>
-                        <input type="text" name="symbol" className="form-control" value={symbol} autofocus
-                        onChange={e => setSymbol(e.target.value.toUpperCase())} style={styles.input}  required/>
+                        <label style={styles.label}>Stock Symbol</label>
+                        <input type="text" name="symbol" className="form-control" value={symbol} autoFocus 
+                        onChange={e => setSymbol(e.target.value.toUpperCase())} style={styles.input} required/>
                     </div>
-
-                    <div style={{...styles.fieldWrap, marginTop:"16px"}}>
-                        <label style={styles.label}> Quantity</label>
-                        <input type="number" name="quantity" className="form-control" value={quantity} min="1" 
-                        onChange={e => setQuantity(e.target.value)} style={styles.input} required/>
+ 
+                    <div style={{ ...styles.fieldWrap, marginTop: "16px" }}>
+                        <label style={styles.label}>Quantity</label>
+                        <input type="number" name="quantity" className="form-control" value={quantity} min="1"
+                            onChange={e => setQuantity(e.target.value)} style={styles.input} required/>
                     </div>
-
-                    <div style={{display:"flex", alignItems:"center", gap:"14px", marginTop:"24px"}}>
-                        <button type="submit" style={{
-                            ...styles.submitBtn, background: accent, boxShadow: "0 4px 14px " + accentGlow,
-                        }}
-                        onMouseOver={e => e.currentTarget.style.background = accentHover}
-                        onMouseOut={e => e.currentTarget.style.background = accent} >
+ 
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px", marginTop: "24px" }}>
+                        <button
+                            type="submit"
+                            style={{ ...styles.submitBtn, background: accent, boxShadow: "0 4px 14px " + accentGlow }}
+                            onMouseOver={e => e.currentTarget.style.background = accentHover}
+                            onMouseOut={e => e.currentTarget.style.background = accent}
+                        >
                             <i className={isBuy ? "bi bi-cart-plus" : "bi bi-cart-dash"}></i>
                             {isBuy ? " Confirm Buy" : " Confirm Sell"}
                         </button>
@@ -145,6 +199,24 @@ const styles = {
         zIndex: 1,
         transition: "color 0.2s ease",
     },
+    exchangeTrack: {
+        display: "flex",
+        background: "#f0f0f0",
+        borderRadius: "10px",
+        padding: "3px",
+        gap: "2px",
+        marginTop: "6px",
+        height: "40px",
+    },
+    exchangeBtn: {
+        flex: 1,
+        border: "none",
+        borderRadius: "8px",
+        fontSize: "13px",
+        letterSpacing: "0.4px",
+        cursor: "pointer",
+        transition: "all 0.2s ease",
+    },
     fieldWrap: {
         display: "flex",
         flexDirection: "column",
@@ -181,5 +253,6 @@ const styles = {
         fontWeight: 500,
     },
 };
-
+ 
 ReactDOM.render(React.createElement(TradeApp, null), document.getElementById("trade-root"));
+ 
