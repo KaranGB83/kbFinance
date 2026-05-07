@@ -30,7 +30,7 @@ def resolve_symbol(symbol: str, exchange: str = None):
         if not ticker.history("1d").empty:
             return bare + suffix, True
         
-    return symbol, None
+    return symbol, False
 
 def get_stock_price(symbol: str):
     stock = yf.Ticker(symbol)
@@ -43,7 +43,7 @@ def get_stock_price(symbol: str):
 def get_stock_info(name: str, exchange: str = None):
     """Returns name, price, currency for a given ticker symbol."""
     resolved, is_indian = resolve_symbol(name, exchange)
-    stock = yf.Ticker(name)
+    stock = yf.Ticker(resolved)
     info = stock.info
     
     if not info or "regularMarketPrice" not in info and "currentPrice" not in info:
