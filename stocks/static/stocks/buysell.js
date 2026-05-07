@@ -81,7 +81,7 @@ function TradeApp() {
                 {/* Exchange selector */}
                 <div style={{ marginBottom: "24px" }}>
                     <label style={styles.label}>Exchange</label>
-                    <div style={styles.exchangeTag}>
+                    <div style={styles.exchangeTrack}>
                         {EXCHANGES.map(({ value, label}) => {
                             const active = exchange === value;
                             return (
@@ -102,7 +102,7 @@ function TradeApp() {
                         })}
                     </div>
                     {exchange === "OTHER" && (
-                        <p style={{ fontSize: "12px", color: "#999", marginTop: "6px", marginBottom0 }}>
+                        <p style={{ fontSize: "12px", color: "#999", marginTop: "6px", marginBottom: 0 }}>
                             Enter the full yfinance symbol (e.g. <code>GOLD.NS</code>, <code>NIFTY50.NS</code>)
                         </p>
                     )}
