@@ -21,3 +21,21 @@
     
     Don't have an account? <a href="{% url 'accounts:register' %}">Register here.</a>
 {% endblock %}
+{% block scripts %}
+    <script>
+        document.querySelector('form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.querySelector('[name=username]').value;
+            const password = document.querySelector('[name=password]').value;
+            const res = await fetch('/api/token/', {
+                method: 'POST',
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username, password})
+            });
+            const data = await res.json();
+            localStorage.setItem('access_token', data.access);
+            localStorage.setItem('refresh_token', data.refresh);
+            window.location.href = '/';  // redirect manually after storing tokens
+    });
+    </script>
+{% endblock %}
