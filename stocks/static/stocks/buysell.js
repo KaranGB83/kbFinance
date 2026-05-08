@@ -27,13 +27,68 @@ const EXCHANGES = [
 // Trade Fuvtion of SPA
 // ---------------------------------------------------------------------------
 function TradeApp() {
+    // Add to state
+    const [error, setError]     = useState(null);
+    const [success, setSuccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        setError(null); setSuccess(null); setLoading(true);
+
+        const token = localStorage.getItem("access_token");
+        const url   = isBuy ? buyUrl : sellUrl;
+
+        try {
+            const res  = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({ symbol, quantity: parseInt(quantity), exchange }),
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                // Try token refresh once on 401
+                if (res.status === 401) {
+                    const refreshed = await refreshToken();
+                    if (refreshed) { handleSubmit(e); return; }
+                }
+                setError(data.error || "Something went wrong.");
+            } else {
+                setSuccess(data.message);
+                setTimeout(() => window.location.href = "/portfolio/", 1200);
+            }
+        } catch {
+            setError("Network error. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function refreshToken() {
+        const refresh = localStorage.getItem("refresh_token");
+        if (!refresh) return false;
+        const res = await fetch("/api/token/refresh/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh }),
+        });
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem("access_token", data.access);
+            return true;
+        }
+        return false;
+    }
     const [mode, setMode]           = useState("BUY");
     const [symbol, setSymbol]       = useState(initSymbol);
     const [quantity, setQuantity]   = useState("");
     const [exchange, setExchange] = useState(initExchange);
  
     const isBuy         = mode === "BUY";
-    const actionUrl     = isBuy ? buyUrl : sellUrl;
     const accent        = isBuy ? "#2dff1a" : "#ff442f";
     const accentHover   = isBuy ? "#009440" : "#b50e0e";
     const accentGlow    = isBuy ? "#3ffea5" : "#ff6026";
@@ -109,31 +164,32 @@ function TradeApp() {
                 </div>
  
                 {/* Form */}
-                <form action={actionUrl} method="post">
-                    <input type="hidden" name="csrfmiddlewaretoken" value={csrf} />
-                    <input type="hidden" name="exchange" value={exchange} />
- 
+                <form onSubmit={handleSubmit}>
+                    {error   && <div className="alert alert-danger  mt-2">{error}</div>}
+                    {success && <div className="alert alert-success mt-2">{success}</div>}
+
                     <div style={styles.fieldWrap}>
                         <label style={styles.label}>Stock Symbol</label>
-                        <input type="text" name="symbol" className="form-control" value={symbol} autoFocus 
-                        onChange={e => setSymbol(e.target.value.toUpperCase())} style={styles.input} required/>
-                    </div>
- 
+                        <input type="text" className="form-control" value={symbol} autoFocus 
+                            onChange={e => setSymbol(e.target.value.toUpperCase())} style={styles.input} required />
+                     </div>
                     <div style={{ ...styles.fieldWrap, marginTop: "16px" }}>
                         <label style={styles.label}>Quantity</label>
-                        <input type="number" name="quantity" className="form-control" value={quantity} min="1"
-                            onChange={e => setQuantity(e.target.value)} style={styles.input} required/>
+                        <input type="number" className="form-control" value={quantity} min="1"
+                            onChange={e => setQuantity(e.target.value)}
+                            style={styles.input} required />
                     </div>
- 
+
                     <div style={{ display: "flex", alignItems: "center", gap: "14px", marginTop: "24px" }}>
                         <button
                             type="submit"
+                            disabled={loading}
                             style={{ ...styles.submitBtn, background: accent, boxShadow: "0 4px 14px " + accentGlow }}
                             onMouseOver={e => e.currentTarget.style.background = accentHover}
                             onMouseOut={e => e.currentTarget.style.background = accent}
                         >
                             <i className={isBuy ? "bi bi-cart-plus" : "bi bi-cart-dash"}></i>
-                            {isBuy ? " Confirm Buy" : " Confirm Sell"}
+                            {loading ? " Processing..." : (isBuy ? " Confirm Buy" : " Confirm Sell")}
                         </button>
                         <a href="/" style={styles.cancelBtn}>Cancel</a>
                     </div>
