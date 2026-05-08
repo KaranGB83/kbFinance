@@ -21,8 +21,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include("accounts.urls")),
-    path('stocks/', include("stocks.urls")),
-    path("", include("stocks.urls")),
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path('stocks/', include("stocks.urls")), 
+    path("", include("stocks.urls")), # set stocks app as default
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain"), # JWT token obtain view
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"), # JWT token refresh view
 ]

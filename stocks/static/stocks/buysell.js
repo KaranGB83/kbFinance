@@ -17,6 +17,7 @@ function parsePrefill(raw, exchangeHint) {
 
 const { sym: initSymbol, exchange:initExchange } = parsePrefill(prefill, prefillExchange)
 
+// List of supported exchanges for the toggle selector. We can add more later if needed.
 const EXCHANGES = [
     { value: "NSE", label: "NSE" },
     { value: "BSE", label: "BSE" },
@@ -32,13 +33,14 @@ function TradeApp() {
     const [success, setSuccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    // Handle form submission for buy/sell
     async function handleSubmit(e) {
         e.preventDefault();
         setError(null); setSuccess(null); setLoading(true);
 
         const token = localStorage.getItem("access_token");
         const url   = isBuy ? buyUrl : sellUrl;
-
+        // Note: We send the exchange info to the server so it can validate the symbol against the correct exchange and fetch accurate data. The server will also handle any necessary symbol transformations for yfinance.
         try {
             const res  = await fetch(url, {
                 method: "POST",
@@ -50,6 +52,7 @@ function TradeApp() {
             });
             const data = await res.json();
 
+            // If the response is not OK, show the error message. Otherwise, show success and redirect to portfolio after a short delay. We also handle token refresh on 401 errors to improve user experience.
             if (!res.ok) {
                 // Try token refresh once on 401
                 if (res.status === 401) {
@@ -68,6 +71,7 @@ function TradeApp() {
         }
     }
 
+    // Function to refresh JWT token using the refresh token. This is called when we get a 401 response, to attempt to get a new access token and retry the request without forcing the user to log in again.
     async function refreshToken() {
         const refresh = localStorage.getItem("refresh_token");
         if (!refresh) return false;
@@ -83,6 +87,7 @@ function TradeApp() {
         }
         return false;
     }
+    // End of token refresh function 
     const [mode, setMode]           = useState("BUY");
     const [symbol, setSymbol]       = useState(initSymbol);
     const [quantity, setQuantity]   = useState("");
@@ -199,6 +204,9 @@ function TradeApp() {
     );
 }
 
+// ---------------------------------------------------------------------------
+// Render the TradeApp component into the DOM
+// ---------------------------------------------------------------------------
 const styles = {
     page: {
         display: "flex",
@@ -309,6 +317,7 @@ const styles = {
         fontWeight: 500,
     },
 };
- 
+
+// Render the TradeApp component into the DOM
 ReactDOM.render(React.createElement(TradeApp, null), document.getElementById("trade-root"));
  

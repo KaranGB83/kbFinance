@@ -3,6 +3,7 @@ import yfinance as yf
 # Priority Order for Indian Suffixes
 _INDIAN_SUFFIXES = [(".NS", "NSE"), (".BO", "BSE")]
 
+# Strip known Indian suffixes from symbol to get the base ticker
 def _strip_suffix(symbol: str) -> str:
     """Removes Known Suffix from symbol"""
     upper = symbol.upper()
@@ -11,6 +12,7 @@ def _strip_suffix(symbol: str) -> str:
             return symbol[:-len(suffix)]
     return symbol
 
+# Resolve symbol to include exchange suffix if it's an Indian stock
 def resolve_symbol(symbol: str, exchange: str = None):
     """check whether exchange is indian or not."""
 
@@ -32,6 +34,7 @@ def resolve_symbol(symbol: str, exchange: str = None):
         
     return symbol, False
 
+# Get stock price using yfinance, fallback to history if info is not available
 def get_stock_price(symbol: str):
     stock = yf.Ticker(symbol)
     data = stock.history(period="1d")
@@ -40,6 +43,7 @@ def get_stock_price(symbol: str):
         return float(data["Close"].iloc[-1])
     return None
 
+# Get stock info including name, price, currency, and exchange
 def get_stock_info(name: str, exchange: str = None):
     """Returns name, price, currency for a given ticker symbol."""
     resolved, is_indian = resolve_symbol(name, exchange)

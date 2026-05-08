@@ -125,7 +125,7 @@ def sell_stock(request):
     )
     return Response({"message": "Sell successful", "symbol": symbol, "quantity": quantity, "price": price})
 
-
+# View to show buy/sell form with pre-filled symbol and exchange
 @login_required
 def buysell(request):
     symbol = request.GET.get("symbol", "")
@@ -134,7 +134,7 @@ def buysell(request):
 
 
 # ==============================================================================
-# View Functions on stocks stocks.
+# View Functions on stocks.
 # ==============================================================================
 @login_required
 def portfolio_view(request):
@@ -163,12 +163,14 @@ def portfolio_view(request):
         "wallet_balance": wallet.amount,
         "total_portfolio_value": total_portfolio_value,
     })
- 
+
+# View to show transaction history 
 @login_required
 def transaction_view(request):
     transactions = Transaction.objects.filter(user=request.user).select_related("stock").order_by("-created_at")
     return render(request, "stocks/transactions.html", {"transactions": transactions})
 
+# View to get stock quote information via API
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def quote(request):

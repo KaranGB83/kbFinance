@@ -8,7 +8,7 @@ from django.urls import reverse
 from stocks.models import Wallet
 from .models import User
 
-# Create your views here.
+# Log in view
 def login_view(request):
     if request.method == "POST":
 
@@ -28,12 +28,13 @@ def login_view(request):
     else:
         return render(request, "accounts/login.html")
 
-
+# Log out view
+@login_required
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("stocks:index"))
 
-
+# Register view
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
