@@ -48,8 +48,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 // Show buy/sell buttons only for Indian stocks since we only support trading those
                 if (data.is_indian) {
-                    document.getElementById("quoteBuyBtn").href  = `${window.KB_URLS.buy}?symbol=${data.symbol}`;
-                    document.getElementById("quoteSellBtn").href = `${window.KB_URLS.sell}?symbol=${data.symbol}`;
+                    document.getElementById("quoteBuyBtn").href  = `${window.KB_URLS.trade}?symbol=${data.symbol}`;
+                    document.getElementById("quoteSellBtn").href = `${window.KB_URLS.trade}?symbol=${data.symbol}&mode=SELL`;
                     document.getElementById("quoteBuySellBtns").style.display = "block";
                     quoteNotIndian.style.display = "none";
                 } else {
