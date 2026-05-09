@@ -14,6 +14,7 @@
         sellUrl:         "{% url 'stocks:sell' %}",
         prefill:         "{{ prefill_symbol|escapejs }}",
         prefillExchange: "{{ prefill_exchange|escapejs }}",
+        prefillMode:     "{{ prefill_mode|escapejs }}",
     };
 </script>
 <script type="text/babel" src="{% static 'stocks/buysell.js' %}"></script>
