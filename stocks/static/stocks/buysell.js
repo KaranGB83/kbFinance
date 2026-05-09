@@ -3,7 +3,7 @@
 
 const { useState } = React;
  
-const { csrf, buyUrl, sellUrl, prefill, prefillExchange } = window.TRADE;
+const { csrf, buyUrl, sellUrl, prefill, prefillExchange, prefillMode } = window.TRADE;
 
 // ---------------------------------------------------------------------------
 // Parse a prefilled symbol: strip .NS / .BO suffix and infer exchange
@@ -88,7 +88,7 @@ function TradeApp() {
         return false;
     }
     // End of token refresh function 
-    const [mode, setMode]           = useState("BUY");
+    const [mode, setMode]           = useState(prefillMode || "BUY");
     const [symbol, setSymbol]       = useState(initSymbol);
     const [quantity, setQuantity]   = useState("");
     const [exchange, setExchange] = useState(initExchange);
