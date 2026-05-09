@@ -130,7 +130,8 @@ def sell_stock(request):
 def buysell(request):
     symbol = request.GET.get("symbol", "")
     exchange = request.GET.get("exchange", "NSE")
-    return render(request, "stocks/buysell.html", {"prefill_symbol": symbol,"prefill_exchange": exchange,})
+    mode = request.GET.get("mode", "BUY")
+    return render(request, "stocks/buysell.html", {"prefill_symbol": symbol,"prefill_exchange": exchange,"prefill_mode": mode})
 
 
 # ==============================================================================
