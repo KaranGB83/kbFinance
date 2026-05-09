@@ -3,13 +3,14 @@
 
 const { useState } = React;
  
-const { csrf, buyUrl, sellUrl, prefill, prefillExchange, prefillMode } = window.TRADE;
+const { csrf, buyUrl, sellUrl, prefill = "", prefillExchange = "NSE", prefillMode = "BUY" } = window.TRADE || {};
 
 // ---------------------------------------------------------------------------
 // Parse a prefilled symbol: strip .NS / .BO suffix and infer exchange
 // ---------------------------------------------------------------------------
 
-function parsePrefill(raw, exchangeHint) {
+function parsePrefill(raw = "", exchangeHint) {
+    if (!raw) return { sym: "", exchange: exchangeHint || "NSE" };
     if (raw.endsWith(".NS")) return { sym: raw.slice(0, -3), exchange: "NSE" };
     if (raw.endsWith(".BO")) return { sym: raw.slice(0, -3), exchange: "BSE" };
     return { sym: raw, exchange: exchangeHint || "NSE" };
@@ -64,7 +65,7 @@ function TradeApp() {
                 setSuccess(data.message);
                 setTimeout(() => window.location.href = "/portfolio/", 1200);
             }
-        } catch {
+        } catch (err) {
             setError("Network error. Please try again.");
         } finally {
             setLoading(false);
