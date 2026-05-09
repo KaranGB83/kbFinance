@@ -29,3 +29,6 @@ secrets.json
 
 # Migrations
 */migrations/
+
+# Docker
+postgres_data/
