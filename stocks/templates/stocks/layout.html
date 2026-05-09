@@ -132,14 +132,6 @@
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
-    <!-- Django URLs for use in scripts.js -->
-    <script>
-        window.KB_URLS = {
-            quote: "{% url 'stocks:quote' %}",
-            buy: "{% url 'stocks:buy' %}",
-            sell: "{% url 'stocks:sell' %}",
-        };
-    </script>
 
     <!-- Django URLs for use in scripts.js -->
     <script>
@@ -147,6 +139,7 @@
             quote: "{% url 'stocks:quote' %}",
             buy:   "{% url 'stocks:buy' %}",
             sell:  "{% url 'stocks:sell' %}",
+            trade: "{% url 'stocks:buysell' %}",   
         };
     </script>
 
