@@ -1,0 +1,30 @@
+# python files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+# virtual environment
+venv/
+env/
+.venv/
+# Django files
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+*.log
+# environment and secrets
+.env
+.env.*
+secrets.json
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+
+# git files
+.git/
+.gitignore
+# .md files
+*.md
