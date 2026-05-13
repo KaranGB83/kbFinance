@@ -32,10 +32,12 @@
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({username, password})
             });
-            const data = await res.json();
-            localStorage.setItem('access_token', data.access);
-            localStorage.setItem('refresh_token', data.refresh);
-            window.location.href = '/';  // redirect manually after storing tokens
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh);
+            }
+            this.submit();
     });
     </script>
 {% endblock %}
