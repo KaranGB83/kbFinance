@@ -31,3 +31,31 @@
     Already have an account? <a href="{% url 'accounts:login' %}">Log In here.</a>
 
 {% endblock %}
+{% block scripts %}
+    <script>
+        document.querySelector('form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = this.querySelector('[name=username]').value;
+            const password = this.querySelector('[name=password]').value;
+            const regRes = await fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this)
+            });
+            if (!regRes.url.includes('register')) {
+                const jwtRes = await fetch('/api/token/', {
+                    method: 'POST',
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({username, password})
+                });
+                if (jwtRes.ok) {
+                    const data = await jwtRes.json();
+                    localStorage.setItem('access_token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                }
+                window.location.href = '/';
+            } else {
+                this.submit();
+            }
+        });
+    </script>
+{% endblock %}
