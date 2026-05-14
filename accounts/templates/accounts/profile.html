@@ -1,9 +1,55 @@
 {% extends 'stocks/layout.html' %}
+{% load static %}
 
 {% block title %}Profile{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{% static 'stocks/styles.css' %}">
+{%  endblock %}
 {% block body %}
-<h2>Profile</h2>
-<h3>Username: {{user}}</h3>
-<h3>Wallet : {{wallet_balance}}</h3>
+<div class="profile-wrapper">
+  <div class="profile-card">
+
+    <div class="profile-banner">
+      <div class="profile-avatar">
+        {{ user.username|slice:":1"|upper }}{{ user.username|slice:"1:2"|upper }}
+      </div>
+    </div>
+
+    <div class="profile-body">
+      <p class="profile-name">{{ user.username }}</p>
+      <p class="profile-label">Member account &mdash; {{ user.email|default:"no email set" }}</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <p class="stat-label">Wallet Balance</p>
+          <p class="stat-value green">${{ wallet_balance|floatformat:2 }}</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Account</p>
+          <p class="stat-value">Active</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="meta-row">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0"/>
+          <path d="M8 10c-4 0-6 2-6 3s1 1 1 1h10s1 0 1-1-2-3-6-3"/>
+        </svg>
+        Signed in as <strong>{{ user.username }}</strong>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="action-row">
+        <a href="{% url 'stocks:index' %}" class="btn btn-primary">&#x2192; Go to Dashboard</a>
+        <a href="{% url 'accounts:logout' %}" class="btn btn-ghost">Log out</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 {% endblock %}
