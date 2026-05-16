@@ -45,11 +45,27 @@
                 <p class="text-muted small">
                     Enter an NSE / BSE symbol (e.g. <code>RELIANCE</code>, <code>TCS</code>, <code>INFY</code>)
                 </p>
-                <div class="input-group mb-3">
-                    <input id="quoteInput" type="text" class="form-control text-uppercase" placeholder="e.g. RELIANCE">
+                <div class="input-group mb-3" style="position:relative;">
+                    <input id="quoteInput" type="text" class="form-control text-uppercase" placeholder="e.g. RELIANCE" autocomplete="off">
                     <div class="input-group-append">
                         <button id="quoteBtn" class="btn btn-dark" type="button">Get Quote</button>
                     </div>
+
+                    <!-- Suggestions dropdown -->
+                    <ul id="suggestionsList" style="
+                        display:none;
+                        position:absolute;
+                        top:100%; left:0;
+                        width:100%;
+                        background:#fff;
+                        border:1px solid #ccc;
+                        border-top:none;
+                        border-radius:0 0 6px 6px;
+                        list-style:none;
+                        margin:0; padding:0;
+                        z-index:999;
+                        box-shadow:0 4px 8px rgba(0,0,0,0.08);
+                    "></ul>
                 </div>
 
                 <div id="quoteResult" style="display:none;">
@@ -133,5 +149,55 @@
     </div>
 
 </div>
+<script>
+const quoteInput      = document.getElementById("quoteInput");
+const suggestionsList = document.getElementById("suggestionsList");
+const quoteBtn        = document.getElementById("quoteBtn");
 
+let debounceTimer;
+
+// Fetch and render suggestions
+function fetchSuggestions(query) {
+    fetch(`{% url 'stocks:suggestions' %}?q=${encodeURIComponent(query)}`, {
+        credentials: 'same-origin',
+        headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    })
+    .then(r => r.json())
+    .then(data => {
+        suggestionsList.innerHTML = "";
+        if (!data.length) { suggestionsList.style.display = "none"; return; }
+
+        data.forEach(item => {
+            const li = document.createElement("li");
+            li.style.cssText = "padding:8px 12px; cursor:pointer; font-size:14px; border-bottom:1px solid #f0f0f0;";
+            li.innerHTML = `<strong>${item.symbol}</strong>
+                <span style="color:#888; margin-left:8px; font-size:12px;">
+                    ${item.name || ""} ${item.exchange ? "· " + item.exchange : ""}
+                </span>`;
+            li.addEventListener("mousedown", () => {
+                quoteInput.value = item.symbol;
+                suggestionsList.style.display = "none";
+                quoteBtn.click();  // auto-fetch quote on selection
+            });
+            suggestionsList.appendChild(li);
+        });
+
+        suggestionsList.style.display = "block";
+    });
+}
+
+// Show recent searches on focus
+quoteInput.addEventListener("focus", () => fetchSuggestions(""));
+
+// Debounce typing — waits 300ms after user stops typing
+quoteInput.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => fetchSuggestions(quoteInput.value), 300);
+});
+
+// Hide on blur (small delay so mousedown fires first)
+quoteInput.addEventListener("blur", () => {
+    setTimeout(() => { suggestionsList.style.display = "none"; }, 150);
+});
+</script>
 {% endblock %}
