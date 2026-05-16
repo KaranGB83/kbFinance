@@ -27,8 +27,6 @@ secrets.json
 .idea/
 *.swp
 
-# Migrations
-*/migrations/
 
 # Docker
 postgres_data/
