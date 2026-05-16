@@ -48,3 +48,19 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.transaction_type} - {self.stock.symbol}"
+
+class SearchHistory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    symbol = models.CharField(max_length=32)
+    name = models.CharField(max_length=128, blank=True)
+    exchange = models.CharField(max_length=8, blank=True)
+
+    class Meta:
+        ordering = ["-id"]
+        unique_together = ["user", "symbol"]
+
+    def __str__(self):
+        return f"{self.user.username} → {self.symbol}"
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
