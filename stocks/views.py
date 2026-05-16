@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse
 
-from .models import Stock, Portfolio, Transaction, Wallet
+from .models import Stock, Portfolio, Transaction, Wallet, SearchHistory
 from .util import get_stock_price, get_stock_info, resolve_symbol
  
 # ==============================================================================
@@ -178,7 +178,55 @@ def quote(request):
     symbol = request.GET.get("symbol", "").upper().strip()
     if not symbol:
         return Response({"error": "No symbol provided"}, status=status.HTTP_400_BAD_REQUEST)
-    info = get_stock_info(symbol)
-    if not info["price"]:
-        return Response({"error": f"Could not find a price for '{symbol}'."}, status=status.HTTP_404_NOT_FOUND)
-    return Response(info)
+
+    try:
+        info = get_stock_info(symbol)
+
+        if not info.get("price"):
+            return Response({"error": f"Could not find a price for '{symbol}'."}, status=status.HTTP_404_NOT_FOUND)
+
+        SearchHistory.objects.update_or_create(
+            user=request.user,
+            symbol=info["symbol"],
+            defaults={"name": info.get("name", ""), "exchange": info.get("exchange", "")}
+        )
+        return Response(info)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def suggestions(request):
+    query = request.GET.get("q", "").upper().strip()
+    if not query:
+        # Return user's recent 6 searches when input is empty/focused
+        recent = SearchHistory.objects.filter(
+            user=request.user
+        ).values("symbol", "name", "exchange")[:6]
+        return Response(list(recent))
+
+    # Match against this user's history first
+    results = SearchHistory.objects.filter(
+        user=request.user,
+        symbol__istartswith=query
+    ).values("symbol", "name", "exchange")[:6]
+
+    # If fewer than 3 personal results, pull from all users' history too
+    if results.count() < 3:
+        global_results = SearchHistory.objects.filter(
+            symbol__istartswith=query
+        ).exclude(
+            user=request.user
+        ).values("symbol", "name", "exchange").distinct()[:6]
+
+        # Merge, deduplicate by symbol
+        seen = {r["symbol"] for r in results}
+        combined = list(results)
+        for r in global_results:
+            if r["symbol"] not in seen:
+                combined.append(r)
+                seen.add(r["symbol"])
+        return Response(combined[:6])
+
+    return Response(list(results))
