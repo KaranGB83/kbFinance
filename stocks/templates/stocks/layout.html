@@ -53,7 +53,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'stocks:buysell' %}">
+                    <a class="nav-link" href="{% url 'stocks:buysell' %}?mode=SELL">  {# CHANGED: was missing ?mode=SELL so Sell link opened Buy form #}
                         <i class="bi bi-cart-dash"></i> Sell
                     </a>
                 </li>
