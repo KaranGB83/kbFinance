@@ -46,6 +46,10 @@ class Transaction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property                              # ADDED: used in transactions.html to show correct total
+    def total(self):
+        return self.price * self.quantity
+
     def __str__(self):
         return f"{self.transaction_type} - {self.stock.symbol}"
 
