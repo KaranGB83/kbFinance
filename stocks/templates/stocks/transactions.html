@@ -28,7 +28,7 @@
                     <td><strong>{{ t.stock.symbol }}</strong></td>
                     <td>{{ t.quantity }}</td>
                     <td>₹{{ t.price|floatformat:2 }}</td>
-                    <td>₹{{ t.quantity|floatformat:0 }}</td>
+                    <td>₹{{ t.total|floatformat:2 }}</td>  {# CHANGED: was t.quantity|floatformat:0 which was wrong #}
                 </tr>
                 {% endfor %}
             </tbody>
@@ -36,7 +36,7 @@
     </div>
     {% else %}
     <div class="alert alert-info">
-        No transactions yet. <a href="{% url 'stocks:buy' %}">Make your first trade!</a>
+        No transactions yet. <a href="{% url 'stocks:buysell' %}">Make your first trade!</a>
     </div>
     {% endif %}
 {% endblock %}
