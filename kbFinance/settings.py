@@ -117,7 +117,7 @@ DATABASES = {
         'USER': os.environ.get("POSTGRES_USER"),
         'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
         'HOST': os.environ.get("DB_HOST"),
-        'PORT': "5432",
+        'PORT': os.getenv("DB_PORT", "5432"),
         'CONN_MAX_AGE': 60,  # ADDED: reuse DB connections for 60s instead of reconnecting every request
     }
 }
