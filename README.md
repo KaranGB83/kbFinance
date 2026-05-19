@@ -121,13 +121,13 @@ The backend is built with Django, and the app includes an embedded React buy/sel
 - `stocks/templates/stocks/portfolio.html`: portfolio summary template.
 - `stocks/templates/stocks/transactions.html`: transaction history template.
 
-## Distinctiveness
+## Distinctiveness and Complexity
 
-kbFinance is distinctive because it merges Django server-rendered workflows with an embedded React trading interface, while automatically resolving NSE/BSE symbols for Indian stock trading. It also keeps persistent search history and validates wallet balances before executing trades.
+kbFinance is distinct from the course projects because it is not a generic e-commerce storefront, social network, or portfolio tracker with only static data. Instead, it is a stock trading simulator that integrates live market data, supports exchange-aware NSE/BSE symbol resolution, and manages real trading mechanics such as wallet balance validation, average cost tracking, and position liquidation.
 
-## Complexity
+This project combines traditional Django server-rendered pages with an embedded React trading experience. The buy/sell interface uses JWT-authenticated API calls, while the rest of the site remains classic Django with template rendering, demonstrating a hybrid front-end/back-end architecture.
 
-The app manages multiple interrelated models for users, wallets, portfolios, transactions, and search history. It also integrates external stock data from `yfinance`, supports JWT-authenticated API calls, and includes both local Python and Docker-based deployment flows.
+The complexity of kbFinance comes from its multiple interacting models and business rules. The app tracks users, wallets, portfolios, transactions, and search history; computes portfolio value and gain/loss; handles buy and sell order aggregation; and resolves stock symbols across different exchanges using `yfinance`. It also supports both local Python development and Docker deployment, including PostgreSQL configuration and secure environment management.
 
 ## Features
 
