@@ -19,7 +19,7 @@ staticfiles/
 
 # Environment / secrets
 .env
-.env.*
+.env.local
 secrets.json
 
 # IDE/editor
