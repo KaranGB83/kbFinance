@@ -3,7 +3,7 @@
 ## Live demo
 - **App**: [kbFinance on Render](https://kbfinance.onrender.com)
 - **Repository**: [GitHub Repo](https://github.com/KaranGB83/kbFinance)
-- **Video Demo**: [YouTube Video](...)
+- **Video Demo**: [YouTube Video](https://youtu.be/fFUXlzn7RlQ)
 
 ## Project Overview
 
