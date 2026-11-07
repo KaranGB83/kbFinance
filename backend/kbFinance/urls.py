@@ -1,28 +1,20 @@
 """
-URL configuration for kbFinance project.
+URL configuration for the kbFinance API.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+The backend is a pure JSON API (plus the Django admin); the UI lives in /frontend.
 """
 from django.contrib import admin
-from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.http import JsonResponse
+from django.urls import include, path
+
+
+def health(request):
+    return JsonResponse({"status": "ok"})
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include("accounts.urls")),
-    path('stocks/', include("stocks.urls")), 
-    path("", include("stocks.urls")), # set stocks app as default
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain"), # JWT token obtain view
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"), # JWT token refresh view
+    path("admin/", admin.site.urls),
+    path("api/health/", health, name="health"),
+    path("api/auth/", include("accounts.urls")),
+    path("api/", include("stocks.urls")),
 ]

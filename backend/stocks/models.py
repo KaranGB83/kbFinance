@@ -24,10 +24,20 @@ class Portfolio(models.Model):
 
 # model for user wallet to track available cash balance
 class Wallet(models.Model):
+    STARTING_BALANCE = 1000
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     amount = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def for_user(cls, user):
+        """Return the user's wallet, creating one with the starting balance if missing."""
+        wallet = cls.objects.filter(user=user).first()
+        if wallet is None:
+            wallet = cls.objects.create(user=user, amount=cls.STARTING_BALANCE)
+        return wallet
 
 # model for transactions to log buy/sell activity with details
 class Transaction(models.Model):

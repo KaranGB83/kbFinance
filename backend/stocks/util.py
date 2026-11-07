@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+
 import yfinance as yf
 
 # Priority Order for Indian Suffixes
@@ -42,6 +44,15 @@ def get_stock_price(symbol: str):
     if not data.empty:
         return float(data["Close"].iloc[-1])
     return None
+
+# Fetch prices for several symbols concurrently (yfinance calls are network-bound)
+def get_stock_prices(symbols, max_workers: int = 8):
+    """Returns {symbol: price or None} for every symbol, fetched in parallel."""
+    symbols = list(dict.fromkeys(symbols))
+    if not symbols:
+        return {}
+    with ThreadPoolExecutor(max_workers=min(max_workers, len(symbols))) as pool:
+        return dict(zip(symbols, pool.map(get_stock_price, symbols)))
 
 # Get stock info including name, price, currency, and exchange
 def get_stock_info(name: str, exchange: str = None):
