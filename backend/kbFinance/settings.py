@@ -28,7 +28,13 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')  # CHAN
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')  # CHANGED: was ['*']. Set ALLOWED_HOSTS=yourdomain.com in .env
 
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')  # ADDED: required for POST in Django 4+
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')  # only needed for the Django admin (the API uses JWT)
+
+# Origins of the separate React frontend that may call this API (comma separated).
+# Not needed in dev when using the Vite proxy, required when the frontend is hosted elsewhere.
+CORS_ALLOWED_ORIGINS = [
+    o.strip() for o in os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',') if o.strip()
+]
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -45,13 +51,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',  # ADDED: for JWT refresh token rotation
+    'corsheaders',
 ]
 
 # Django REST Framework settings
 REST_FRAMEWORK = {
+    # The API is stateless and JWT-only. (The Django admin keeps using its own session login.)
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
       'rest_framework.permissions.IsAuthenticated',
@@ -64,6 +71,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'user': '60/min',
+        'auth': '20/min',   # login / register, per client IP
     },
 }
 
@@ -79,6 +87,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -110,17 +119,26 @@ WSGI_APPLICATION = 'kbFinance.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get("POSTGRES_DB"),
-        'USER': os.environ.get("POSTGRES_USER"),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
-        'HOST': os.environ.get("DB_HOST"),
-        'PORT': os.getenv("DB_PORT", "5432"),
-        'CONN_MAX_AGE': 60,  # ADDED: reuse DB connections for 60s instead of reconnecting every request
+if os.environ.get("POSTGRES_DB"):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get("POSTGRES_DB"),
+            'USER': os.environ.get("POSTGRES_USER"),
+            'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
+            'HOST': os.environ.get("DB_HOST"),
+            'PORT': os.getenv("DB_PORT", "5432"),
+            'CONN_MAX_AGE': 60,  # reuse DB connections for 60s instead of reconnecting every request
+        }
     }
-}
+else:
+    # Zero-config local development: fall back to SQLite when POSTGRES_DB is not set.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
