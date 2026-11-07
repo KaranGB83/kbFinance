@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -7,6 +9,8 @@ from rest_framework.response import Response
 from .models import Portfolio, SearchHistory, Stock, Transaction, Wallet
 from .serializers import TradeSerializer, TransactionSerializer
 from .util import get_stock_info, get_stock_price, get_stock_prices, resolve_symbol
+
+logger = logging.getLogger(__name__)
 
 
 def _error(message, code=status.HTTP_400_BAD_REQUEST):
@@ -96,6 +100,7 @@ def quote(request):
     try:
         info = get_stock_info(symbol)
     except Exception:
+        logger.exception("Quote lookup failed for %s", symbol)
         return _error("Could not fetch quote right now. Please try again.", status.HTTP_502_BAD_GATEWAY)
 
     if not info.get("price"):

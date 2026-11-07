@@ -1,6 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor
 
+import logging
+
 import yfinance as yf
+
+logger = logging.getLogger(__name__)
 
 # Priority Order for Indian Suffixes
 _INDIAN_SUFFIXES = [(".NS", "NSE"), (".BO", "BSE")]
@@ -59,8 +63,14 @@ def get_stock_info(name: str, exchange: str = None):
     """Returns name, price, currency for a given ticker symbol."""
     resolved, is_indian = resolve_symbol(name, exchange)
     stock = yf.Ticker(resolved)
-    info = stock.info
-    
+    # .info is the most fragile Yahoo endpoint (cookie/crumb, often rate-limited from cloud IPs).
+    # Treat it as optional: the price can still come from the history endpoint.
+    try:
+        info = stock.info or {}
+    except Exception:
+        logger.warning("yfinance .info failed for %s, falling back to price history", resolved, exc_info=True)
+        info = {}
+
     if not info or "regularMarketPrice" not in info and "currentPrice" not in info:
         price = get_stock_price(resolved)
     else:
@@ -82,7 +92,7 @@ def get_stock_info(name: str, exchange: str = None):
         "symbol": resolved,
         "name": stock_name,
         "price": price,
-        "currency": info.get("currency", ""),
+        "currency": info.get("currency") or ("INR" if is_indian else ""),
         "exchange": exch_name,
         "is_indian":is_indian
     }
