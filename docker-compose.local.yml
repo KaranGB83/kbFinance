@@ -1,32 +1,36 @@
+# Full local stack: PostgreSQL + Django API + React (nginx).
+#   cp backend/.env.example backend/.env   (set DB_HOST=db for this stack)
+#   docker compose -f docker-compose.local.yml up --build
+# App: http://localhost:3000   API: http://localhost:8000/api/
 services:
 
   db:
     image: postgres:16-alpine
     restart: always
-    env_file: .env
+    env_file: ./backend/.env
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 5s
-    
+
   web:
-    build: .
+    build: ./backend
     restart: always
-    env_file: .env
+    env_file: ./backend/.env
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
-    healthcheck:                                          
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -36,6 +40,14 @@ services:
       options:
         max-size: "5m"
         max-file: "3"
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - web
 
 volumes:
   postgres_data:

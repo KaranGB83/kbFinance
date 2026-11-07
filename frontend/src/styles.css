@@ -1,0 +1,240 @@
+/* ==========================================================================
+   Theme tokens (light by default, dark via <html data-theme="dark">)
+   ========================================================================== */
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface2: #f0f0f0;
+  --border: #e0e0e0;
+  --text: #212529;
+  --muted: #6c757d;
+  --shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --surface2: #2a2a2a;
+  --border: #333;
+  --text: #e0e0e0;
+  --muted: #888;
+  --shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+body { background: var(--bg); color: var(--text); }
+
+/* ==========================================================================
+   Dark-mode overrides for Bootstrap 4 components
+   ========================================================================== */
+[data-theme="dark"] .card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+[data-theme="dark"] .card.bg-dark,
+[data-theme="dark"] .card.bg-primary,
+[data-theme="dark"] .card.bg-secondary,
+[data-theme="dark"] .card.bg-networth { color: #fff !important; }
+[data-theme="dark"] .card.bg-dark { background: #0a0a0a !important; }
+[data-theme="dark"] .card.bg-primary { background: #0056b3 !important; }
+[data-theme="dark"] .card.bg-secondary { background: #444b52 !important; }
+[data-theme="dark"] .card.bg-networth { background: #1a7a4a !important; }
+[data-theme="dark"] .card-header { border-color: var(--border) !important; }
+[data-theme="dark"] .card-header.bg-dark { background: #0a0a0a !important; color: #fff !important; }
+
+[data-theme="dark"] .table { color: var(--text); }
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th { border-color: var(--border) !important; }
+[data-theme="dark"] .thead-dark th { background: #0a0a0a !important; border-color: #000 !important; }
+[data-theme="dark"] .thead-light th { background: var(--surface2) !important; color: var(--text) !important; }
+[data-theme="dark"] .table-hover tbody tr:hover { background: var(--surface2); color: var(--text); }
+
+[data-theme="dark"] .form-control {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--text);
+}
+[data-theme="dark"] .form-control:focus {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: #555;
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .alert-info { background: #0d3349; border-color: #1a5276; color: #aed6f1; }
+[data-theme="dark"] .text-muted { color: var(--muted) !important; }
+@media (max-width: 991.98px) {
+  [data-theme="dark"] .navbar-collapse { background: #1a1a1a; }
+}
+[data-theme="dark"] a:not(.btn):not(.nav-link):not(.navbar-brand) { color: #6ea8fe; }
+[data-theme="dark"] .btn-link { color: rgba(255, 255, 255, 0.5); }
+[data-theme="dark"] code { color: #f78fb3; }
+
+/* ==========================================================================
+   Layout helpers
+   ========================================================================== */
+.text-uppercase::placeholder { text-transform: none; }
+.opacity-80 { opacity: 0.8; }
+.opacity-70 { opacity: 0.7; }
+.bg-networth { background: #1a7a4a; }
+
+.theme-toggle { border-color: #555; padding: 3px 10px; }
+.navbar .btn-link.nav-link { text-decoration: none; }
+.navbar-nav .nav-link.active { color: #fff; }
+
+.auth-page { max-width: 460px; }
+
+/* ==========================================================================
+   Quote search suggestions
+   ========================================================================== */
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  z-index: 999;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+.suggestions li {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.suggestions li:last-child { border-bottom: none; }
+.suggestions li:hover { background: var(--surface2); }
+.suggestion-meta { color: var(--muted); margin-left: 8px; font-size: 12px; }
+
+/* ==========================================================================
+   Profile
+   ========================================================================== */
+.profile-card { max-width: 560px; margin-top: 2rem; overflow: hidden; border-radius: 16px; }
+.profile-banner {
+  position: relative;
+  height: 80px;
+  background: repeating-linear-gradient(135deg, #1a2540 0, #1a2540 2px, #1f2d4d 2px, #1f2d4d 20px);
+}
+.profile-avatar {
+  position: absolute;
+  bottom: -28px;
+  left: 1.5rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #1a2540;
+  border: 3px solid var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 22px Georgia, serif;
+  color: #7eb6ff;
+}
+.profile-body { padding-top: 2.5rem; }
+.stat-card { background: var(--surface2); border-radius: 10px; padding: 0.9rem 1rem; }
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.stat-value { font-size: 22px; font-weight: 600; }
+
+/* ==========================================================================
+   Trade page
+   ========================================================================== */
+.trade-page { display: flex; justify-content: center; padding: 20px 0 40px; }
+.trade-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 36px 40px;
+}
+.trade-header { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; font-size: 22px; color: var(--muted); }
+.trade-header h4 { margin: 0; font-size: 20px; font-weight: 700; color: var(--text); }
+
+.trade-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.trade-input { border-radius: 10px; border: 1.5px solid var(--border); padding: 10px 14px; height: auto; font-size: 15px; }
+
+.toggle-track {
+  position: relative;
+  display: flex;
+  height: 46px;
+  padding: 3px;
+  margin-bottom: 20px;
+  background: var(--surface2);
+  border-radius: 50px;
+}
+.toggle-pill {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(50% - 6px);
+  height: calc(100% - 6px);
+  border-radius: 50px;
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease;
+}
+.toggle-track.is-buy .toggle-pill { background: #1fa855; box-shadow: 0 2px 10px #3ffea555; }
+.toggle-track.is-sell .toggle-pill { left: calc(50% + 3px); background: #e5412d; box-shadow: 0 2px 10px #ff602655; }
+.toggle-track button {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  border: none;
+  background: transparent;
+  border-radius: 50px;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.toggle-track button.active { color: #fff; font-weight: 700; }
+
+.exchange-track { display: flex; gap: 2px; height: 40px; padding: 3px; background: var(--surface2); border-radius: 10px; }
+.exchange-track button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.exchange-track button.active { background: #1a1a1a; color: #fff; font-weight: 700; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18); }
+[data-theme="dark"] .exchange-track button.active { background: #000; }
+
+.trade-submit {
+  flex: 1;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.trade-submit:disabled { opacity: 0.7; cursor: wait; }
+.trade-submit.buy { background: #1fa855; }
+.trade-submit.buy:hover:not(:disabled) { background: #009440; }
+.trade-submit.sell { background: #e5412d; }
+.trade-submit.sell:hover:not(:disabled) { background: #b50e0e; }
+.trade-cancel { margin-left: 14px; color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; }
+
+@media (max-width: 480px) {
+  .trade-card { padding: 28px 22px; }
+}

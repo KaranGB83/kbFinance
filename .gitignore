@@ -30,3 +30,9 @@ secrets.json
 
 # Docker
 postgres_data/
+
+# Frontend (Vite / Node)
+node_modules/
+dist/
+frontend/.env
+frontend/.env.local

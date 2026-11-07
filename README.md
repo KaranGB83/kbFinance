@@ -9,210 +9,149 @@
 
 kbFinance is a stock trading simulator that lets users buy and sell stocks, manage a portfolio, and monitor wallet balance across NSE/BSE markets. The application uses live stock quotes to validate trades, calculate portfolio value, and log transaction history.
 
-The backend is built with Django, and the app includes an embedded React buy/sell interface component. It supports deployment with Docker and PostgreSQL while also allowing local Python development.
+The project is split into two independent apps that talk over a JSON API:
+
+| Directory   | What it is                                                          |
+|-------------|---------------------------------------------------------------------|
+| `backend/`  | Django + Django REST Framework API, JWT auth, PostgreSQL, `yfinance` |
+| `frontend/` | React single-page app built with Vite (React Router, Bootstrap 4)   |
 
 ## Project structure
 
 ```
 .
-├── .dockerignore
-├── .env
-├── .env.example
-├── .git
-├── .gitignore
-├── Dockerfile
-├── README.md
-├── db.sqlite3
-├── docker-compose.local.yml
-├── manage.py
-├── requirements.txt
-├── start.sh
-├── accounts/
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── migrations/
-│   │   ├── __init__.py
-│   │   └── 0001_initial.py
-│   ├── models.py
-│   ├── tests.py
-│   ├── urls.py
-│   ├── views.py
-│   ├── static/accounts/
-│   └── templates/accounts/
-├── kbFinance/
-│   ├── __init__.py
-│   ├── asgi.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-└── stocks/
-    ├── __init__.py
-    ├── admin.py
-    ├── apps.py
-    ├── migrations/
-    │   ├── __init__.py
-    │   ├── 0001_initial.py
-    │   └── 0002_searchhistory.py
-    ├── models.py
-    ├── tests.py
-    ├── urls.py
-    ├── util.py
-    ├── views.py
-    ├── static/stocks/
-    │   ├── buysell.js
-    │   ├── scripts.js
-    │   └── styles.css
-    └── templates/stocks/
-        ├── buysell.html
-        ├── index.html
-        ├── layout.html
-        ├── portfolio.html
-        └── transactions.html
+├── .github/workflows/supabase-keepalive.yml
+├── docker-compose.local.yml      # db + backend + frontend (nginx)
+├── backend/
+│   ├── manage.py
+│   ├── requirements.txt
+│   ├── Dockerfile / start.sh
+│   ├── .env.example
+│   ├── kbFinance/                # settings, root urls, wsgi/asgi
+│   ├── accounts/                 # custom User model + auth API (register/login/logout/me)
+│   └── stocks/                   # models, trading/quote API, yfinance helpers, tests
+└── frontend/
+    ├── package.json / vite.config.js / index.html
+    ├── Dockerfile / nginx.conf
+    ├── .env.example
+    └── src/
+        ├── api/client.js         # fetch wrapper: JWT header + automatic token refresh
+        ├── auth/AuthContext.jsx  # login / register / logout state
+        ├── components/           # Navbar, ProtectedRoute, QuoteLookup, ...
+        ├── pages/                # Dashboard, Portfolio, Transactions, Trade, Profile, Login, Register
+        └── styles.css            # theme tokens + dark mode
 ```
 
-## File descriptions
+## API
 
-- `.dockerignore`: Docker ignore rules for the build context.
-- `.env`: deployment/local environment variables for Django and Docker.
-- `.env.example`: sample environment variable template for creating a local `.env` file.
-- `.git`: Git metadata and repository history.
-- `.gitignore`: files excluded from version control.
-- `Dockerfile`: instructions to build the Docker image for the app.
-- `README.md`: project documentation and usage instructions.
-- `db.sqlite3`: local SQLite database file used for development.
-- `docker-compose.local.yml`: local Docker Compose service definitions for web and database.
-- `manage.py`: Django management command launcher.
-- `requirements.txt`: Python package requirements for the project.
-- `start.sh`: Docker entrypoint script used to launch Gunicorn.
-- `accounts/__init__.py`: package marker for the accounts app.
-- `accounts/admin.py`: registers account-related models with Django admin.
-- `accounts/apps.py`: Django app configuration for accounts.
-- `accounts/migrations/__init__.py`: migrations package marker.
-- `accounts/migrations/0001_initial.py`: initial database migration for accounts.
-- `accounts/models.py`: custom user model and related account models.
-- `accounts/tests.py`: placeholder for account app tests.
-- `accounts/urls.py`: authentication-related URL routes.
-- `accounts/views.py`: login, logout, register, and profile views.
-- `accounts/static/accounts/`: static assets for account templates.
-- `accounts/templates/accounts/`: HTML templates for auth-related pages.
-- `kbFinance/__init__.py`: package marker for the Django project.
-- `kbFinance/asgi.py`: ASGI application entrypoint.
-- `kbFinance/settings.py`: Django configuration and environment settings.
-- `kbFinance/urls.py`: root URL router for the Django project.
-- `kbFinance/wsgi.py`: WSGI application entrypoint.
-- `stocks/__init__.py`: package marker for the stocks app.
-- `stocks/admin.py`: registers stock-related models with Django admin.
-- `stocks/apps.py`: Django app configuration for stocks.
-- `stocks/migrations/__init__.py`: migrations package marker.
-- `stocks/migrations/0001_initial.py`: initial database migration for stocks.
-- `stocks/migrations/0002_searchhistory.py`: adds search history model migration.
-- `stocks/models.py`: models for stocks, portfolio, wallet, transactions, and search history.
-- `stocks/tests.py`: placeholder for stocks app tests.
-- `stocks/urls.py`: URL routing for stock pages and APIs.
-- `stocks/util.py`: symbol resolution and stock quote helper functions.
-- `stocks/views.py`: dashboard, portfolio, trade, quote, and suggestion views.
-- `stocks/static/stocks/buysell.js`: React-based buy/sell interface.
-- `stocks/static/stocks/scripts.js`: client-side JavaScript for stock search and page behavior.
-- `stocks/static/stocks/styles.css`: CSS styles for stocks pages.
-- `stocks/templates/stocks/buysell.html`: trade page template with React mount node.
-- `stocks/templates/stocks/index.html`: main dashboard template.
-- `stocks/templates/stocks/layout.html`: shared base template.
-- `stocks/templates/stocks/portfolio.html`: portfolio summary template.
-- `stocks/templates/stocks/transactions.html`: transaction history template.
+All endpoints live under `/api/` and return JSON. Everything except register/login/refresh/health needs an `Authorization: Bearer <access token>` header.
+
+| Method | Path                    | Purpose                                              |
+|--------|-------------------------|------------------------------------------------------|
+| GET    | `/api/health/`          | Liveness check                                       |
+| POST   | `/api/auth/register/`   | Create account + starting wallet, returns tokens     |
+| POST   | `/api/auth/login/`      | Returns `access`, `refresh` and the user             |
+| POST   | `/api/auth/refresh/`    | Rotate tokens                                        |
+| POST   | `/api/auth/logout/`     | Blacklist the refresh token                          |
+| GET    | `/api/auth/me/`         | Current user and wallet balance                      |
+| GET    | `/api/dashboard/`       | Wallet, portfolio value, net worth, recent trades    |
+| GET    | `/api/portfolio/`       | Holdings with live prices and gain/loss              |
+| GET    | `/api/transactions/`    | Full trade history                                   |
+| GET    | `/api/quote/?symbol=`   | Live quote (also saved to search history)            |
+| GET    | `/api/suggestions/?q=`  | Recent / matching symbols                            |
+| POST   | `/api/buy/`, `/api/sell/` | `{symbol, quantity, exchange}` (`NSE`, `BSE`, `OTHER`) |
+
+Errors are returned as `{"error": "message"}`.
 
 ## Distinctiveness and Complexity
 
 kbFinance is distinct from the course projects because it is not a generic e-commerce storefront, social network, or portfolio tracker with only static data. Instead, it is a stock trading simulator that integrates live market data, supports exchange-aware NSE/BSE symbol resolution, and manages real trading mechanics such as wallet balance validation, average cost tracking, and position liquidation.
 
-This project combines traditional Django server-rendered pages with an embedded React trading experience. The buy/sell interface uses JWT-authenticated API calls, while the rest of the site remains classic Django with template rendering, demonstrating a hybrid front-end/back-end architecture.
+The app is a decoupled architecture: a Django REST API secured with short-lived JWT access tokens (with refresh-token rotation and blacklisting) and a separate Vite + React single-page app that handles routing, auth state, and automatic token refresh on the client.
 
-The complexity of kbFinance comes from its multiple interacting models and business rules. The app tracks users, wallets, portfolios, transactions, and search history; computes portfolio value and gain/loss; handles buy and sell order aggregation; and resolves stock symbols across different exchanges using `yfinance`. It also supports both local Python development and Docker deployment, including PostgreSQL configuration and secure environment management.
+The complexity of kbFinance comes from its multiple interacting models and business rules. The app tracks users, wallets, portfolios, transactions, and search history; computes portfolio value and gain/loss; handles buy and sell order aggregation inside atomic database transactions; and resolves stock symbols across different exchanges using `yfinance`. It also supports both local development and Docker deployment, including PostgreSQL configuration and secure environment management.
 
 ## Features
 
-- User registration, login, logout, and profile management
+- User registration, login, logout, and profile page
 - Wallet balance tracking and cash validation for trades
 - Live NSE/BSE quote lookup and exchange-aware symbol resolution
 - Buy and sell operations with order validation and transaction logging
 - Portfolio summary with market value and gain/loss calculation
 - Transaction history listing all completed trades
 - Search suggestions and recent search history
-- Docker deployment support and local Python development support
+- Light / dark theme, responsive layout
+- Docker deployment support and local development support
 
 ## Technologies
 
-- Python 3 / Django
-- Django REST Framework
-- PostgreSQL-ready database configuration
-- `yfinance` for stock quotes and symbol lookup
-- React for the buy/sell trading UI component
-- HTML, CSS, and JavaScript
-- Whitenoise for static asset serving
+- **Backend:** Python 3, Django, Django REST Framework, SimpleJWT, django-cors-headers, `yfinance`, Whitenoise, Gunicorn, PostgreSQL
+- **Frontend:** React, React Router, Vite, Bootstrap 4, Bootstrap Icons
+- **Infra:** Docker, Docker Compose, nginx
 
-## Installation
+## Running locally
 
-### Local Python development
+### 1. Backend (http://localhost:8000)
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/KaranGB83/kbFinance.git
-   cd kbFinance
-   ```
-2. Create and activate a Python virtual environment:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Copy `.env.example` to `.env` and update the values for your environment:
-   ```bash
-   cp .env.example .env
-   ```
-5. Update `.env` with values for:
-   - `SECRET_KEY`
-   - `DEBUG`
-   - `ALLOWED_HOSTS`
-   - `CSRF_TRUSTED_ORIGINS`
-   - `POSTGRES_DB`
-   - `POSTGRES_USER`
-   - `POSTGRES_PASSWORD`
-   - `DB_HOST`
-   - `DB_PORT`
-   - `WEB_CONCURRENCY`
-6. Run migrations:
-   ```bash
-   python manage.py migrate
-   ```
-7. Start the development server:
-   ```bash
-   python manage.py runserver
-   ```
-   ```bash
-   python manage.py migrate
-   ```
-6. Start the development server:
-   ```bash
-   python manage.py runserver
-   ```
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env        # edit the values; leave POSTGRES_DB empty to use SQLite
+python manage.py migrate
+python manage.py runserver
+```
 
-### Docker deployment
+Run the tests with `python manage.py test`.
 
-1. Start the Docker Compose stack:
-   ```bash
-   docker compose -f docker-compose.local.yml up --build
-   ```
-2. This launches:
-   - `db` service running PostgreSQL
-   - `web` service running Django on port `8000`
-3. Visit `http://localhost:8000` in your browser.
+### 2. Frontend (http://localhost:5173)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The Vite dev server proxies `/api` to `http://127.0.0.1:8000`, so no CORS setup is needed in development. Use `npm run build` to create a production build in `frontend/dist/`.
+
+### Docker (everything at once)
+
+```bash
+cp backend/.env.example backend/.env   # set DB_HOST=db and fill in the secrets
+docker compose -f docker-compose.local.yml up --build
+```
+
+Open `http://localhost:3000`. nginx serves the React build and proxies `/api` to the Django container (also reachable directly on port 8000).
+
+## Configuration
+
+**Backend (`backend/.env`)**
+
+| Variable               | Purpose                                                           |
+|------------------------|-------------------------------------------------------------------|
+| `SECRET_KEY`           | Django secret key (required in production)                        |
+| `DEBUG`                | `true` / `false`                                                  |
+| `ALLOWED_HOSTS`        | Comma separated hostnames                                         |
+| `CORS_ALLOWED_ORIGINS` | Origin(s) of the frontend when hosted on a different domain       |
+| `CSRF_TRUSTED_ORIGINS` | Only needed for the Django admin over HTTPS                       |
+| `POSTGRES_*`, `DB_HOST`, `DB_PORT` | PostgreSQL connection; leave `POSTGRES_DB` unset for SQLite |
+| `WEB_CONCURRENCY`      | Gunicorn workers                                                  |
+
+**Frontend (`frontend/.env`)**
+
+| Variable            | Purpose                                                                          |
+|---------------------|----------------------------------------------------------------------------------|
+| `VITE_API_BASE_URL` | Backend URL when the frontend is hosted separately (empty = same origin / proxy) |
+
+## Deploying the two halves separately
+
+- **Backend** (e.g. Render): root directory `backend/`, uses the `Dockerfile` there. Set `ALLOWED_HOSTS` to the API hostname and `CORS_ALLOWED_ORIGINS` to the frontend's URL.
+- **Frontend** (e.g. Vercel / Netlify / Render static site): root directory `frontend/`, build command `npm run build`, publish directory `dist`. Set `VITE_API_BASE_URL` to the backend URL and add a rewrite of all routes to `/index.html` so React Router deep links work.
 
 ## Usage
 
-- Create a user account or log in.
+- Create a user account or log in (new accounts start with ₹1,000).
 - Search for stock tickers and view quotes.
 - Use the buy/sell screen to execute trades.
 - Monitor portfolio holdings and wallet balance.
@@ -220,20 +159,16 @@ The complexity of kbFinance comes from its multiple interacting models and busin
 
 ## Notes
 
-- Use the `OTHER` exchange option for non-Indian stock symbols.
-- Use `.env.example` to create your own `.env` file and keep production secrets out of version control.
-- `db.sqlite3` is included for quick local development, while Docker uses PostgreSQL.
+- Use the `OTHER` exchange option for non-Indian stock symbols and enter the full yfinance symbol.
+- Keep real secrets out of version control; use the `.env.example` files as templates.
+- JWTs are stored in `localStorage`; access tokens last 30 minutes and are refreshed automatically.
 
 ## Future improvements
 
-- Add a dedicated standalone React frontend.
-- Add API and end-to-end test coverage.
+- Add frontend tests and end-to-end test coverage.
 - Add stock charts and real-time updates.
 - Add limit orders and more advanced trade controls.
 
 ## Acknowledgements
 
 This repository documents an end-to-end finance web app with local and Docker deployment options.
-
-
-
