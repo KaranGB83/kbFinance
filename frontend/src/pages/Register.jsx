@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import AuthLayout from "../components/AuthLayout";
 
 export default function Register() {
   const { user, register } = useAuth();
@@ -28,9 +29,10 @@ export default function Register() {
   }
 
   return (
-    <div className="auth-page">
-      <h2>Register</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
+    <AuthLayout>
+      <h2>Create your account</h2>
+      <p className="auth-sub">Get ₹1,000 in virtual cash to start trading.</p>
+      {error && <div key={error} className="alert alert-danger auth-error" role="alert">{error}</div>}
       <form onSubmit={submit}>
         <div className="form-group">
           <input className="form-control" name="username" placeholder="Username" autoFocus
@@ -48,9 +50,9 @@ export default function Register() {
           <input className="form-control" type="password" name="confirmation" placeholder="Confirm Password"
                  autoComplete="new-password" value={form.confirmation} onChange={set} required />
         </div>
-        <button className="btn btn-primary" disabled={busy}>{busy ? "Creating account..." : "Register"}</button>
+        <button className="btn btn-auth" disabled={busy}>{busy ? "Creating account..." : "Register"}</button>
       </form>
       <p className="mt-3">Already have an account? <Link to="/login">Log In here.</Link></p>
-    </div>
+    </AuthLayout>
   );
 }
