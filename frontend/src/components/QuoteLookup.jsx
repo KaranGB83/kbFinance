@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { formatNumber } from "../utils/format";
 
+const POPULAR = ["RELIANCE", "TCS", "INFY", "HDFCBANK", "SBIN", "ITC"];
+
 export default function QuoteLookup() {
   const [symbol, setSymbol] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -92,6 +94,18 @@ export default function QuoteLookup() {
             </ul>
           )}
         </form>
+
+        {!quote && !loading && !error && (
+          <div className="popular">
+            <span className="popular-label">Popular</span>
+            {POPULAR.map((sym) => (
+              <button key={sym} type="button" className="popular-chip"
+                      onClick={() => { setSymbol(sym); fetchQuote(sym); }}>
+                {sym}
+              </button>
+            ))}
+          </div>
+        )}
 
         {loading && <div className="text-muted"><i className="bi bi-hourglass-split" /> Fetching...</div>}
         {error && <div className="alert alert-danger">{error}</div>}
