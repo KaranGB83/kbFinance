@@ -80,6 +80,10 @@ class TradingApiTests(APITestCase):
         self.assertEqual(dash["total_portfolio_value"], 200)
         self.assertEqual(dash["net_worth"], 1000)
         self.assertEqual(dash["holdings_count"], 1)
+        self.assertEqual(dash["total_invested"], 200)
+        self.assertEqual(dash["total_gain_loss"], 0)
+        self.assertEqual(dash["total_gain_loss_pct"], 0)
+        self.assertEqual(dash["top_holdings"][0]["symbol"], "TCS.NS")
         self.assertEqual(dash["recent_transactions"][0]["symbol"], "TCS.NS")
 
         pf = self.client.get(reverse("stocks:portfolio")).data
@@ -87,6 +91,18 @@ class TradingApiTests(APITestCase):
 
         txs = self.client.get(reverse("stocks:transactions")).data
         self.assertEqual(txs[0]["total"], 200)
+
+    def test_dashboard_gain_loss_when_price_moves(self, mock_prices, *_):
+        self.buy(quantity=2)  # bought at 100
+        mock_prices.side_effect = lambda syms: {s: 110.0 for s in syms}
+        dash = self.client.get(reverse("stocks:dashboard")).data
+        self.assertEqual(dash["total_gain_loss"], 20)
+        self.assertAlmostEqual(dash["total_gain_loss_pct"], 10.0)
+
+    def test_dashboard_empty_account(self, *_):
+        dash = self.client.get(reverse("stocks:dashboard")).data
+        self.assertEqual(dash["top_holdings"], [])
+        self.assertEqual(dash["total_gain_loss_pct"], 0)
 
     def test_endpoints_require_authentication(self, *_):
         self.client.force_authenticate(None)

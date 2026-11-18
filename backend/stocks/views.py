@@ -57,11 +57,22 @@ def dashboard(request):
         .select_related("stock")
         .order_by("-created_at")[:5]
     )
+
+    # Overall profit/loss only counts holdings we could price right now.
+    priced = [h for h in holdings if h["current_price"]]
+    invested = sum(h["avg_price"] * h["quantity"] for h in priced)
+    gain_loss = sum(h["gain_loss"] for h in priced)
+    top_holdings = sorted(holdings, key=lambda h: h["total_value"], reverse=True)[:4]
+
     return Response({
         "wallet_balance": wallet.amount,
         "total_portfolio_value": total_value,
         "net_worth": wallet.amount + total_value,
         "holdings_count": len(holdings),
+        "total_invested": invested,
+        "total_gain_loss": gain_loss,
+        "total_gain_loss_pct": (gain_loss / invested * 100) if invested else 0,
+        "top_holdings": top_holdings,
         "recent_transactions": TransactionSerializer(recent, many=True).data,
     })
 
