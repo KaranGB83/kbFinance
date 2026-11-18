@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Dashboard (home page)
+   ========================================================================== */
+@keyframes dash-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes dash-wave { 0%, 60%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(14deg); } 20%, 40% { transform: rotate(-8deg); } 50% { transform: rotate(10deg); } }
+@keyframes dash-alloc { from { width: 0; } }
+
+.dash-rise { animation: dash-rise 0.55s var(--d, 0s) cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+.dash-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  animation: dash-rise 0.5s both;
+}
+.dash-header h2 { font-weight: 800; margin-bottom: 0.2rem; }
+.dash-actions { display: flex; gap: 0.5rem; }
+.wave { display: inline-block; transform-origin: 70% 70%; animation: dash-wave 2.2s 0.6s ease-in-out 1; }
+
+/* ---------- stat tiles ---------- */
+.stat-tile {
+  position: relative;
+  height: 100%;
+  padding: 1.2rem 1.3rem;
+  border-radius: 14px;
+  color: #fff;
+  overflow: hidden;
+  animation: dash-rise 0.55s both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.col-md-4:nth-child(2) .stat-tile { animation-delay: 0.08s; }
+.col-md-4:nth-child(3) .stat-tile { animation-delay: 0.16s; }
+.stat-tile:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25); }
+.stat-tile::after {
+  content: "";
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  right: -40px;
+  top: -50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.09);
+}
+.stat-tile p { margin: 0 0 0.3rem; opacity: 0.8; font-size: 0.9rem; }
+.stat-tile h3 { margin: 0 0 0.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat-tile small { opacity: 0.85; }
+.tile-wallet { background: linear-gradient(135deg, #1f2933, #0b0f14); }
+.tile-portfolio { background: linear-gradient(135deg, #2563eb, #1e40af); }
+.tile-networth { background: linear-gradient(135deg, #1fa855, #0f766e); }
+
+.alloc { height: 6px; margin: 0.5rem 0 0.4rem; border-radius: 6px; background: rgba(255, 255, 255, 0.28); overflow: hidden; }
+.alloc-cash { display: block; height: 100%; border-radius: 6px; background: #fff; animation: dash-alloc 1s 0.4s ease-out both; }
+
+/* ---------- profit / loss chip ---------- */
+.pl-chip { font-weight: 600; font-variant-numeric: tabular-nums; }
+.pl-chip.up { color: #1fa855; }
+.pl-chip.down { color: #e5412d; }
+.pl-chip.on-dark.up { color: #86efac; }
+.pl-chip.on-dark.down { color: #fca5a5; }
+[data-theme="dark"] .pl-chip.up { color: #4ade80; }
+[data-theme="dark"] .pl-chip.down { color: #f87171; }
+
+/* ---------- holdings list / empty state ---------- */
+.holding-list { margin: 0; padding: 0; list-style: none; }
+.holding-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+.holding-list li:last-child { border-bottom: none; }
+.holding-list li:hover { background: var(--surface2); }
+
+.empty-state { padding: 2rem 1.2rem; text-align: center; color: var(--muted); }
+.empty-state i { font-size: 2.4rem; display: block; margin-bottom: 0.4rem; }
+.empty-state p { margin-bottom: 0.8rem; }
+
+/* ---------- popular symbols (quote card) ---------- */
+.popular { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+.popular-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-right: 0.2rem; }
+.popular-chip {
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 50px;
+  padding: 3px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.popular-chip:hover { border-color: #1fa855; background: rgba(31, 168, 85, 0.12); transform: translateY(-1px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dash *, .dash { animation: none !important; transition: none !important; }
+}
+
+/* keep table cells on one line; the table scrolls sideways on narrow screens */
+.dash .table td, .dash .table th { white-space: nowrap; }
