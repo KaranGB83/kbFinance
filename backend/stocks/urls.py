@@ -9,6 +9,7 @@ urlpatterns = [
     path("portfolio/", views.portfolio_view, name="portfolio"),
     path("transactions/", views.transaction_view, name="transactions"),
     path("quote/", views.quote, name="quote"),
+    path("position/", views.position, name="position"),
     path("suggestions/", views.suggestions, name="suggestions"),
     path("buy/", views.buy_stock, name="buy"),
     path("sell/", views.sell_stock, name="sell"),

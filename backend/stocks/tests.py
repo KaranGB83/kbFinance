@@ -104,9 +104,21 @@ class TradingApiTests(APITestCase):
         self.assertEqual(dash["top_holdings"], [])
         self.assertEqual(dash["total_gain_loss_pct"], 0)
 
+    def test_position_reports_holding_and_zero(self, *_):
+        self.assertEqual(self.client.get(reverse("stocks:position"), {"symbol": "TCS.NS"}).data["quantity"], 0)
+        self.buy(quantity=3)
+        res = self.client.get(reverse("stocks:position"), {"symbol": "tcs.ns"}).data
+        self.assertEqual((res["quantity"], res["avg_price"]), (3, PRICE))
+        self.assertEqual(self.client.get(reverse("stocks:position")).status_code, 400)
+
+    def test_position_is_per_user(self, *_):
+        self.buy(quantity=2)
+        self.client.force_authenticate(User.objects.create_user("zed", password="pw"))
+        self.assertEqual(self.client.get(reverse("stocks:position"), {"symbol": "TCS.NS"}).data["quantity"], 0)
+
     def test_endpoints_require_authentication(self, *_):
         self.client.force_authenticate(None)
-        for name in ("dashboard", "portfolio", "transactions", "quote", "suggestions"):
+        for name in ("dashboard", "portfolio", "transactions", "quote", "suggestions", "position"):
             self.assertEqual(self.client.get(reverse(f"stocks:{name}")).status_code, 401, name)
         self.assertEqual(self.client.post(reverse("stocks:buy"), {}, format="json").status_code, 401)
 

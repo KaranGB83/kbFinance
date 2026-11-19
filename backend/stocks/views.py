@@ -156,6 +156,24 @@ def suggestions(request):
     return Response(mine[:6])
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def position(request):
+    """How many shares of one (already resolved, e.g. TCS.NS) symbol the user holds. No price lookup."""
+    symbol = request.GET.get("symbol", "").upper().strip()
+    if not symbol:
+        return _error("No symbol provided")
+
+    holding = (
+        Portfolio.objects.filter(user=request.user, stock__symbol=symbol, quantity__gt=0).first()
+    )
+    return Response({
+        "symbol": symbol,
+        "quantity": holding.quantity if holding else 0,
+        "avg_price": holding.avg_price if holding else 0,
+    })
+
+
 # ==============================================================================
 # Trading
 # ==============================================================================
