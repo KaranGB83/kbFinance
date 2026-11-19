@@ -58,10 +58,7 @@ export default function Navbar() {
                 <NavLink to="/transactions" className={link} onClick={close}><i className="bi bi-clock-history" /> Transactions</NavLink>
               </li>
               <li className="nav-item">
-                <Link to="/trade?mode=BUY" className="nav-link" onClick={close}><i className="bi bi-cart-plus" /> Buy</Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/trade?mode=SELL" className="nav-link" onClick={close}><i className="bi bi-cart-dash" /> Sell</Link>
+                <NavLink to="/trade" className={link} onClick={close}><i className="bi bi-arrow-left-right" /> Trade</NavLink>
               </li>
             </>
           )}
