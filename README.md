@@ -1,7 +1,7 @@
 # kbFinance — finance app by kb
 
 ## Live demo
-- **App**: [kbFinance on Render](https://kbfinance.onrender.com)
+- **App**: [kbFinance on Render](https://kbfinance-1.onrender.com/)
 - **Repository**: [GitHub Repo](https://github.com/KaranGB83/kbFinance)
 - **Video Demo**: [YouTube Video](https://youtu.be/fFUXlzn7RlQ)
 
